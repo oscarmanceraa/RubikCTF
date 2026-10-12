@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+@theme {
+  --color-grafito: #141020;
+  --color-superficie: #1e1834;
+  --color-superficie-2: #272050;
+  --color-borde: #342b56;
+  --color-tinta: #f4f2ff;
+  --color-apagado: #a49dc4;
+  --color-acento: #7c5cff;
+  --color-acento-suave: #a48bff;
+  --color-peligro: #ff5470;
+  --color-aviso: #ffc24b;
+
+  --font-sans: "Space Grotesk Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", monospace;
+}
+
+@layer base {
+  html,
+  body,
+  #raiz {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-grafito text-tinta antialiased;
+    font-family: var(--font-sans);
+    background-image: radial-gradient(
+      70% 55% at 10% 0%,
+      rgba(124, 92, 255, 0.12),
+      transparent 70%
+    );
+    background-attachment: fixed;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-acento ring-offset-2 ring-offset-grafito;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+}
+
+@layer components {
+  .panel {
+    @apply rounded-2xl border border-borde bg-superficie;
+  }
+
+  .panel-2 {
+    @apply rounded-xl border border-borde bg-superficie-2;
+  }
+
+  .boton {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-borde px-4 py-2 text-sm font-medium text-tinta transition-colors hover:border-acento-suave hover:text-acento-suave disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .boton-primario {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-acento px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-acento-suave disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .campo {
+    @apply w-full rounded-xl border border-borde bg-grafito px-3 py-2 text-sm text-tinta outline-none placeholder:text-apagado/60 focus:border-acento;
+  }
+
+  .etiqueta {
+    @apply mb-1 block text-sm font-medium text-apagado;
+  }
+}
