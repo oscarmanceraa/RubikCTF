@@ -85,6 +85,7 @@ def comentario():
     texto = (request.form.get("texto") or "")[:2000]
     with CANDADO:
         COMENTARIOS.append({"autor": autor, "texto": texto})
+        del COMENTARIOS[:-50]
     return redirect("/")
 
 
