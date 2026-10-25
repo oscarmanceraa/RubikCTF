@@ -3,6 +3,7 @@
 Es idempotente: se puede ejecutar varias veces sin duplicar registros.
 
     python manage.py sembrar_datos
+    python manage.py sembrar_datos --limpiar   # borra retos que no esten aqui
 
 La URL de los servicios de reto se toma de la variable HOST_RETOS
 (por defecto http://192.168.56.77).
@@ -36,47 +37,22 @@ RETOS = [
         150,
         "RUBIK{sql_injection_101}",
         ["L"],
-        "Un panel de administracion tiene un login vulnerable. Encuentra la flag en su base de datos.",
+        "Un panel de administracion tiene un login vulnerable a SQL Injection. "
+        "Encuentra la flag en su base de datos.",
         f"{BASE_RETOS}:8001",
-    ),
-    (
-        "Credenciales HTTP",
-        "credenciales-http",
-        "redes",
-        "media",
-        400,
-        "RUBIK{http_credentials}",
-        ["R2"],
-        "Se capturo trafico HTTP de un login. Encuentra las credenciales enviadas en claro.",
-        "",
-    ),
-    (
-        "Base64 no es cifrado",
-        "base64-no-es-cifrado",
-        "criptografia",
-        "facil",
-        100,
-        "RUBIK{base64_is_not_encryption}",
-        ["U"],
-        "Quien codifica no cifra. Decodifica el mensaje que encontraras en la descripcion del despliegue.",
-        "",
-    ),
-    (
-        "Cabeceras reveladoras",
-        "cabeceras-reveladoras",
-        "web",
-        "facil",
-        150,
-        "RUBIK{inspect_headers}",
-        ["F"],
-        "A veces la informacion sensible viaja en las cabeceras HTTP. Inspecciona las respuestas.",
-        "",
     ),
 ]
 
 
 class Command(BaseCommand):
-    help = "Crea categorias, movimientos y retos de ejemplo (idempotente)."
+    help = "Crea categorias, movimientos y retos (idempotente)."
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--limpiar",
+            action="store_true",
+            help="Elimina los retos que no esten definidos en este seed.",
+        )
 
     @transaction.atomic
     def handle(self, *args, **options):
@@ -130,6 +106,15 @@ class Command(BaseCommand):
             elif reto.objetivo != objetivo:
                 reto.objetivo = objetivo
                 reto.save(update_fields=["objetivo"])
+
+        if options.get("limpiar"):
+            slugs_validos = [reto[1] for reto in RETOS]
+            sobrantes = Reto.objects.exclude(slug__in=slugs_validos)
+            eliminados = list(sobrantes.values_list("slug", flat=True))
+            sobrantes.delete()
+            self.stdout.write(
+                self.style.WARNING(f"Retos eliminados: {eliminados or 'ninguno'}")
+            )
 
         self.stdout.write(
             self.style.SUCCESS(
