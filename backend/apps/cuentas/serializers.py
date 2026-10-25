@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 
 Usuario = get_user_model()
 
@@ -16,8 +17,24 @@ class SerializadorUsuario(serializers.ModelSerializer):
 
 
 class SerializadorRegistro(serializers.ModelSerializer):
-    usuario = serializers.CharField(source="username")
-    correo = serializers.EmailField(source="email")
+    usuario = serializers.CharField(
+        source="username",
+        validators=[
+            UniqueValidator(
+                queryset=Usuario.objects.all(),
+                message="Ese nombre de usuario ya esta en uso.",
+            )
+        ],
+    )
+    correo = serializers.EmailField(
+        source="email",
+        validators=[
+            UniqueValidator(
+                queryset=Usuario.objects.all(),
+                message="Ese correo ya esta registrado.",
+            )
+        ],
+    )
     contrasena = serializers.CharField(write_only=True, validators=[validate_password])
 
     class Meta:
