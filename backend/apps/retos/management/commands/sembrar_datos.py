@@ -43,18 +43,6 @@ RETOS = [
         f"{BASE_RETOS}:8001",
     ),
     (
-        "Base64 en capas",
-        "base64-en-capas",
-        "criptografia",
-        "facil",
-        100,
-        "RUBIK{base64_layers}",
-        ["U"],
-        "Un mensaje fue codificado varias veces en Base64. Sigue decodificando "
-        "hasta leer la flag.",
-        f"{BASE_RETOS}/recursos/base64-capas/mensaje.txt",
-    ),
-    (
         "Credenciales en el PCAP",
         "credenciales-pcap",
         "redes",
