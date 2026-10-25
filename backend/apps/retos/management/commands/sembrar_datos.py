@@ -1,14 +1,21 @@
-"""Comando de datos de prueba: crea categorias, movimientos y retos de ejemplo.
+"""Comando de datos de prueba: crea categorias, movimientos y retos.
 
 Es idempotente: se puede ejecutar varias veces sin duplicar registros.
 
     python manage.py sembrar_datos
+
+La URL de los servicios de reto se toma de la variable HOST_RETOS
+(por defecto http://192.168.56.77).
 """
+import os
+
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from apps.retos.cube_engine import MOVIMIENTOS
 from apps.retos.models import Categoria, MovimientoCubo, MovimientoReto, Reto
+
+BASE_RETOS = os.environ.get("HOST_RETOS", "http://192.168.56.77").rstrip("/")
 
 CATEGORIAS = [
     ("Web", "web", "#2ecc71", 1),
@@ -19,8 +26,19 @@ CATEGORIAS = [
     ("OSINT / Esteganografia", "osint", "#f2f2f2", 6),
 ]
 
-# (nombre, slug, categoria_slug, dificultad, puntos, flag, [movimientos])
+# (nombre, slug, categoria, dificultad, puntos, flag, [movimientos], descripcion, objetivo)
 RETOS = [
+    (
+        "Acceso al panel",
+        "acceso-al-panel",
+        "web",
+        "facil",
+        150,
+        "RUBIK{sql_injection_101}",
+        ["L"],
+        "Un panel de administracion tiene un login vulnerable. Encuentra la flag en su base de datos.",
+        f"{BASE_RETOS}:8001",
+    ),
     (
         "Credenciales HTTP",
         "credenciales-http",
@@ -30,6 +48,7 @@ RETOS = [
         "RUBIK{http_credentials}",
         ["R2"],
         "Se capturo trafico HTTP de un login. Encuentra las credenciales enviadas en claro.",
+        "",
     ),
     (
         "Base64 no es cifrado",
@@ -40,6 +59,7 @@ RETOS = [
         "RUBIK{base64_is_not_encryption}",
         ["U"],
         "Quien codifica no cifra. Decodifica el mensaje que encontraras en la descripcion del despliegue.",
+        "",
     ),
     (
         "Cabeceras reveladoras",
@@ -50,6 +70,7 @@ RETOS = [
         "RUBIK{inspect_headers}",
         ["F"],
         "A veces la informacion sensible viaja en las cabeceras HTTP. Inspecciona las respuestas.",
+        "",
     ),
 ]
 
@@ -73,12 +94,23 @@ class Command(BaseCommand):
         self.stdout.write(f"Movimientos: {MovimientoCubo.objects.count()}")
 
         creados = 0
-        for nombre, slug, categoria_slug, dificultad, puntos, flag, movimientos, descripcion in RETOS:
+        for (
+            nombre,
+            slug,
+            categoria_slug,
+            dificultad,
+            puntos,
+            flag,
+            movimientos,
+            descripcion,
+            objetivo,
+        ) in RETOS:
             reto, creado = Reto.objects.get_or_create(
                 slug=slug,
                 defaults={
                     "nombre": nombre,
                     "descripcion": descripcion,
+                    "objetivo": objetivo,
                     "categoria": categorias[categoria_slug],
                     "dificultad": dificultad,
                     "puntos": puntos,
@@ -95,9 +127,13 @@ class Command(BaseCommand):
                         orden=orden,
                     )
                 creados += 1
+            elif reto.objetivo != objetivo:
+                reto.objetivo = objetivo
+                reto.save(update_fields=["objetivo"])
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Retos creados: {creados} (existentes omitidos). Total retos: {Reto.objects.count()}"
+                f"Retos creados: {creados} (existentes actualizados si hacia falta). "
+                f"Total retos: {Reto.objects.count()}"
             )
         )

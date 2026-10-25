@@ -43,7 +43,11 @@ class SerializadorRetoDetalle(SerializadorRetoLista):
     cantidad_pistas = serializers.SerializerMethodField()
 
     class Meta(SerializadorRetoLista.Meta):
-        fields = SerializadorRetoLista.Meta.fields + ("descripcion", "cantidad_pistas")
+        fields = SerializadorRetoLista.Meta.fields + (
+            "descripcion",
+            "objetivo",
+            "cantidad_pistas",
+        )
 
     def get_cantidad_pistas(self, obj) -> int:
         return obj.pistas.filter(activa=True).count()

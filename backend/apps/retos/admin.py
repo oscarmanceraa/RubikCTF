@@ -75,7 +75,7 @@ class AdminReto(admin.ModelAdmin):
     inlines = (InlineMovimientoReto, InlinePista)
     readonly_fields = ("hash_flag", "creado_en", "actualizado_en")
     fieldsets = (
-        (None, {"fields": ("nombre", "slug", "descripcion", "categoria")}),
+        (None, {"fields": ("nombre", "slug", "descripcion", "objetivo", "categoria")}),
         ("Puntuacion", {"fields": ("dificultad", "puntos", "activo")}),
         ("Flag", {"fields": ("flag", "hash_flag")}),
         ("Fechas", {"fields": ("creado_en", "actualizado_en"), "classes": ("collapse",)}),

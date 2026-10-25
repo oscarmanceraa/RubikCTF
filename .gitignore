@@ -16,6 +16,7 @@ venv/
 .ruff_cache/
 db.sqlite3
 *.sqlite3
+challenges/**/datos.db
 
 # Node / frontend
 node_modules/

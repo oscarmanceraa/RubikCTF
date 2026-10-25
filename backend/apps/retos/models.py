@@ -56,6 +56,10 @@ class Reto(models.Model):
     nombre = models.CharField("nombre", max_length=120)
     slug = models.SlugField("slug", max_length=140, unique=True)
     descripcion = models.TextField("descripcion", blank=True)
+    objetivo = models.CharField(
+        "objetivo (URL o host)", max_length=200, blank=True,
+        help_text="Servicio a atacar, p. ej. http://192.168.56.77:8001",
+    )
     categoria = models.ForeignKey(
         Categoria, on_delete=models.PROTECT, related_name="retos", verbose_name="categoria"
     )

@@ -1,0 +1,23 @@
+name: rubikctf-challenges
+
+# Red exclusiva de retos. La plataforma (backend/db/web) NO esta en esta red.
+services:
+  web-sqli-login:
+    build:
+      context: ./web-sqli-login
+    container_name: reto-web-sqli-login
+    environment:
+      RETO_FLAG: RUBIK{sql_injection_101}
+    ports:
+      - "8001:5000"
+    networks:
+      - retos
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 128m
+    cpus: 0.5
+
+networks:
+  retos:
+    driver: bridge

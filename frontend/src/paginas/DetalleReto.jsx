@@ -123,6 +123,20 @@ export default function DetalleReto() {
           {reto.descripcion || "Este reto aún no tiene descripción."}
         </p>
 
+        {reto.objetivo ? (
+          <p className="mt-4 text-sm text-apagado">
+            Objetivo:{" "}
+            <a
+              href={reto.objetivo}
+              target="_blank"
+              rel="noreferrer"
+              className="font-mono text-acento-suave hover:underline"
+            >
+              {reto.objetivo}
+            </a>
+          </p>
+        ) : null}
+
         {reto.cantidad_pistas ? (
           <p className="mt-4 text-sm text-apagado">
             Pistas disponibles: {reto.cantidad_pistas}
