@@ -18,6 +18,38 @@ services:
     mem_limit: 128m
     cpus: 0.5
 
+  net-puerto-inesperado:
+    build:
+      context: ./net-puerto-inesperado
+    container_name: reto-net-puerto-inesperado
+    environment:
+      RETO_FLAG: RUBIK{hidden_port}
+    ports:
+      - "31337:9000"
+    networks:
+      - retos
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 64m
+    cpus: 0.25
+
+  net-banner:
+    build:
+      context: ./net-banner
+    container_name: reto-net-banner
+    environment:
+      RETO_FLAG: RUBIK{service_banner}
+    ports:
+      - "8003:8080"
+    networks:
+      - retos
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 64m
+    cpus: 0.25
+
 networks:
   retos:
     driver: bridge

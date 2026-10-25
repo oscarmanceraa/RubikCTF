@@ -17,6 +17,7 @@ from apps.retos.cube_engine import MOVIMIENTOS
 from apps.retos.models import Categoria, MovimientoCubo, MovimientoReto, Reto
 
 BASE_RETOS = os.environ.get("HOST_RETOS", "http://192.168.56.77").rstrip("/")
+HOST = BASE_RETOS.replace("http://", "").replace("https://", "")
 
 CATEGORIAS = [
     ("Web", "web", "#2ecc71", 1),
@@ -40,6 +41,54 @@ RETOS = [
         "Un panel de administracion tiene un login vulnerable a SQL Injection. "
         "Encuentra la flag en su base de datos.",
         f"{BASE_RETOS}:8001",
+    ),
+    (
+        "Base64 en capas",
+        "base64-en-capas",
+        "criptografia",
+        "facil",
+        100,
+        "RUBIK{base64_layers}",
+        ["U"],
+        "Un mensaje fue codificado varias veces en Base64. Sigue decodificando "
+        "hasta leer la flag.",
+        f"{BASE_RETOS}/recursos/base64-capas/mensaje.txt",
+    ),
+    (
+        "Credenciales en el PCAP",
+        "credenciales-pcap",
+        "redes",
+        "media",
+        400,
+        "RUBIK{pcap_basic_auth}",
+        ["R2"],
+        "Se capturo trafico HTTP de un login. Abre el PCAP con Wireshark, "
+        "sigue el flujo y recupera las credenciales (Basic auth).",
+        f"{BASE_RETOS}/recursos/credenciales-pcap/captura.pcap",
+    ),
+    (
+        "Puerto inesperado",
+        "puerto-inesperado",
+        "redes",
+        "facil",
+        200,
+        "RUBIK{hidden_port}",
+        ["F2"],
+        f"Escanea el host {HOST} con nmap (-p-). Hay un servicio en un puerto "
+        "no estandar; lee su banner y encontraras la flag.",
+        "",
+    ),
+    (
+        "Banner revelador",
+        "banner-revelador",
+        "redes",
+        "media",
+        350,
+        "RUBIK{service_banner}",
+        ["B'"],
+        f"Escanea el host {HOST} con nmap -sV. La version de uno de los "
+        "servicios revela la flag.",
+        "",
     ),
 ]
 
