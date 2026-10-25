@@ -1,11 +1,10 @@
-FROM python:3.12-slim
+# Imagen oficial de Playwright: ya incluye Chromium y sus dependencias.
+FROM mcr.microsoft.com/playwright/python:v1.48.0-jammy
 
 ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt \
-    && playwright install --with-deps chromium
+RUN pip install --no-cache-dir Flask==3.0.3
 
 COPY app.py .
 
