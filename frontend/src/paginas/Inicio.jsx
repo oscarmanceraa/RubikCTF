@@ -51,7 +51,7 @@ export default function Inicio() {
           </div>
         </div>
 
-        <CuboRubik inicial={DESORDEN_DEMO} autoRotar pie={false} className="aspect-square w-full" />
+        <CuboRubik inicial={DESORDEN_DEMO} pie={false} className="aspect-square w-full" />
       </div>
 
       <div className="mt-16 border-t border-borde pt-8">
