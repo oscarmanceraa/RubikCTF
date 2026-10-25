@@ -78,6 +78,18 @@ RETOS = [
         "del servicio revela la flag.",
         "",
     ),
+    (
+        "XSS almacenado",
+        "xss-almacenado",
+        "web",
+        "media",
+        400,
+        "RUBIK{stored_xss_101}",
+        ["R'"],
+        f"El servicio esta en {BASE_RETOS}:8004. Es un libro de visitas. "
+        "Publica un comentario que robe la cookie del bot administrador.",
+        f"{BASE_RETOS}:8004",
+    ),
 ]
 
 
