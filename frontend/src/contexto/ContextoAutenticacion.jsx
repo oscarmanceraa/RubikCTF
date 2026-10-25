@@ -28,6 +28,15 @@ export function ProveedorAutenticacion({ children }) {
     })();
   }, []);
 
+  // Cookie con el usuario actual, para que los retos separen su estado por usuario.
+  useEffect(() => {
+    if (usuario?.usuario) {
+      document.cookie = `rubik_usuario=${encodeURIComponent(usuario.usuario)}; path=/; max-age=86400; SameSite=Lax`;
+    } else {
+      document.cookie = "rubik_usuario=; path=/; max-age=0; SameSite=Lax";
+    }
+  }, [usuario]);
+
   async function iniciarSesion(usuarioNombre, contrasena) {
     const { data } = await cliente.post("autenticacion/token/", {
       username: usuarioNombre,

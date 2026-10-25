@@ -1,8 +1,11 @@
-"""Reto Web: XSS almacenado.
+"""Reto Web: XSS almacenado (libro de visitas por usuario).
 
-Un bot administrador visita periodicamente el libro de visitas con la flag en
-su cookie. El participante debe publicar un comentario que ejecute JavaScript
-en el navegador del bot y exfiltre la cookie.
+Un bot administrador visita periodicamente el libro de visitas de cada usuario
+con la flag en su cookie. El participante debe publicar un comentario que
+ejecute JavaScript en el navegador del bot y exfiltre la cookie.
+
+El libro se separa por usuario usando la cookie ``rubik_usuario`` que fija la
+plataforma. Asi, al cambiar de usuario, el libro empieza limpio.
 
 Aplicacion deliberadamente vulnerable. Debe ejecutarse AISLADA.
 """
@@ -15,8 +18,9 @@ from flask import Flask, redirect, render_template_string, request
 app = Flask(__name__)
 FLAG = os.environ.get("RETO_FLAG", "RUBIK{stored_xss_101}")
 
-COMENTARIOS = []
+COMENTARIOS = {}
 CANDADO = threading.Lock()
+USUARIOS_VISTOS = set()
 
 PLANTILLA = """
 <!doctype html>
@@ -50,7 +54,7 @@ PLANTILLA = """
 <body>
   <div class="contenedor">
     <h1>Libro de visitas</h1>
-    <p class="sub">Deja un mensaje. Un administrador revisa los comentarios.</p>
+    <p class="sub">Sesion: {{ usuario }}. Deja un mensaje; un administrador revisa los comentarios.</p>
 
     <form method="post" action="/comentario">
       <input name="autor" placeholder="Tu nombre" maxlength="40">
@@ -72,25 +76,35 @@ PLANTILLA = """
 """
 
 
+def usuario_actual() -> str:
+    nombre = (request.cookies.get("rubik_usuario") or "anonimo").strip()[:40] or "anonimo"
+    with CANDADO:
+        USUARIOS_VISTOS.add(nombre)
+    return nombre
+
+
 @app.get("/")
 def index():
+    nombre = usuario_actual()
     with CANDADO:
-        comentarios = list(COMENTARIOS)
-    return render_template_string(PLANTILLA, comentarios=comentarios)
+        comentarios = list(COMENTARIOS.get(nombre, []))
+    return render_template_string(PLANTILLA, comentarios=comentarios, usuario=nombre)
 
 
 @app.post("/comentario")
 def comentario():
+    nombre = usuario_actual()
     autor = (request.form.get("autor") or "anonimo")[:40]
     texto = (request.form.get("texto") or "")[:2000]
     with CANDADO:
-        COMENTARIOS.append({"autor": autor, "texto": texto})
-        del COMENTARIOS[:-50]
+        lista = COMENTARIOS.setdefault(nombre, [])
+        lista.append({"autor": autor, "texto": texto})
+        del lista[:-50]
     return redirect("/")
 
 
 def bucle_bot() -> None:
-    """El bot visita el libro de visitas con la flag en su cookie."""
+    """El bot visita el libro de cada usuario con la flag en su cookie."""
     from playwright.sync_api import sync_playwright
 
     while True:
@@ -100,20 +114,36 @@ def bucle_bot() -> None:
                     args=["--no-sandbox", "--disable-dev-shm-usage"]
                 )
                 while True:
-                    try:
-                        contexto = navegador.new_context()
-                        contexto.add_cookies(
-                            [
-                                {"name": "admin", "value": "1", "url": "http://127.0.0.1:5000"},
-                                {"name": "flag", "value": FLAG, "url": "http://127.0.0.1:5000"},
-                            ]
-                        )
-                        pagina = contexto.new_page()
-                        pagina.goto("http://127.0.0.1:5000/", timeout=5000)
-                        pagina.wait_for_timeout(2000)
-                        contexto.close()
-                    except Exception:
-                        pass
+                    with CANDADO:
+                        usuarios = list(USUARIOS_VISTOS) or ["anonimo"]
+                    for nombre in usuarios:
+                        try:
+                            contexto = navegador.new_context()
+                            contexto.add_cookies(
+                                [
+                                    {
+                                        "name": "rubik_usuario",
+                                        "value": nombre,
+                                        "url": "http://127.0.0.1:5000",
+                                    },
+                                    {
+                                        "name": "admin",
+                                        "value": "1",
+                                        "url": "http://127.0.0.1:5000",
+                                    },
+                                    {
+                                        "name": "flag",
+                                        "value": FLAG,
+                                        "url": "http://127.0.0.1:5000",
+                                    },
+                                ]
+                            )
+                            pagina = contexto.new_page()
+                            pagina.goto("http://127.0.0.1:5000/", timeout=5000)
+                            pagina.wait_for_timeout(1500)
+                            contexto.close()
+                        except Exception:
+                            pass
                     time.sleep(10)
         except Exception:
             time.sleep(10)
