@@ -1,7 +1,6 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import * as THREE from "three";
+import { OrbitControls, RoundedBox } from "@react-three/drei";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
   COLORES_CARA,
@@ -18,127 +17,101 @@ const DURACION_MOVIMIENTO = 0.35;
 const SEPARACION = 1.0;
 const OFFSET_STICKER = 0.5 + 0.02;
 
-// Recursos compartidos (se crean una sola vez).
-const GEOMETRIA = new THREE.BoxGeometry(0.92, 0.92, 0.08);
-const MATERIAL = new THREE.MeshLambertMaterial();
-const ESCALA = new THREE.Vector3(1, 1, 1);
-const EJE_VECTOR = {
-  x: new THREE.Vector3(1, 0, 0),
-  y: new THREE.Vector3(0, 1, 0),
-  z: new THREE.Vector3(0, 0, 1),
+const ROTACION_NORMAL = {
+  "0,0,1": [0, 0, 0],
+  "0,0,-1": [0, Math.PI, 0],
+  "1,0,0": [0, Math.PI / 2, 0],
+  "-1,0,0": [0, -Math.PI / 2, 0],
+  "0,1,0": [-Math.PI / 2, 0, 0],
+  "0,-1,0": [Math.PI / 2, 0, 0],
 };
 
-const NORMAL_QUAT = {};
-for (const [clave, normal] of Object.entries({
-  "0,0,1": [0, 0, 1],
-  "0,0,-1": [0, 0, -1],
-  "1,0,0": [1, 0, 0],
-  "-1,0,0": [-1, 0, 0],
-  "0,1,0": [0, 1, 0],
-  "0,-1,0": [0, -1, 0],
-})) {
-  NORMAL_QUAT[clave] = new THREE.Quaternion().setFromUnitVectors(
-    new THREE.Vector3(0, 0, 1),
-    new THREE.Vector3(...normal)
+function Sticker({ sticker }) {
+  const [px, py, pz] = sticker.posicion;
+  const [nx, ny, nz] = sticker.normal;
+  const posicion = [
+    px * SEPARACION + nx * OFFSET_STICKER,
+    py * SEPARACION + ny * OFFSET_STICKER,
+    pz * SEPARACION + nz * OFFSET_STICKER,
+  ];
+  const rotacion = ROTACION_NORMAL[`${nx},${ny},${nz}`];
+
+  return (
+    <RoundedBox
+      args={[0.92, 0.92, 0.08]}
+      radius={0.06}
+      smoothness={3}
+      position={posicion}
+      rotation={rotacion}
+    >
+      <meshStandardMaterial
+        color={COLORES_CARA[sticker.color]}
+        roughness={0.35}
+        metalness={0.15}
+      />
+    </RoundedBox>
   );
 }
 
-function Escena({ stickers, version, movimiento, alTerminar }) {
-  const mallaRef = useRef(null);
+function Escena({ stickers, version, movimiento, grupoRef, alTerminar }) {
   const progreso = useRef(0);
-  const movimientoRef = useRef(null);
+  const movimientoRef = useRef(movimiento);
   const invalidate = useThree((estado) => estado.invalidate);
 
-  const matriz = useMemo(() => new THREE.Matrix4(), []);
-  const posicion = useMemo(() => new THREE.Vector3(), []);
-  const quaternion = useMemo(() => new THREE.Quaternion(), []);
-  const rotacion = useMemo(() => new THREE.Quaternion(), []);
-
-  const actualizar = useCallback(
-    (mov, avance) => {
-      const malla = mallaRef.current;
-      if (!malla) return;
-
-      const indice = mov ? indiceEje(mov.eje) : -1;
-      if (mov) {
-        rotacion.setFromAxisAngle(EJE_VECTOR[mov.eje], mov.angulo * avance);
-      }
-
-      for (let i = 0; i < stickers.length; i += 1) {
-        const sticker = stickers[i];
-        const n = sticker.normal;
-        posicion.set(
-          sticker.posicion[0] * SEPARACION + n[0] * OFFSET_STICKER,
-          sticker.posicion[1] * SEPARACION + n[1] * OFFSET_STICKER,
-          sticker.posicion[2] * SEPARACION + n[2] * OFFSET_STICKER
-        );
-        quaternion.copy(NORMAL_QUAT[n.join(",")]);
-
-        if (mov && sticker.posicion[indice] === mov.signo) {
-          posicion.applyQuaternion(rotacion);
-          quaternion.premultiply(rotacion);
-        }
-
-        matriz.compose(posicion, quaternion, ESCALA);
-        malla.setMatrixAt(i, matriz);
-      }
-      malla.instanceMatrix.needsUpdate = true;
-    },
-    [stickers, matriz, posicion, quaternion, rotacion]
-  );
-
-  // Colores (una sola vez) y matrices iniciales.
-  useLayoutEffect(() => {
-    const malla = mallaRef.current;
-    if (!malla) return;
-    malla.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-    for (let i = 0; i < stickers.length; i += 1) {
-      malla.setColorAt(i, new THREE.Color(COLORES_CARA[stickers[i].color]));
-    }
-    if (malla.instanceColor) malla.instanceColor.needsUpdate = true;
-    actualizar(null, 0);
-    invalidate();
-  }, [stickers, actualizar, invalidate]);
-
-  // Recalcular cuando cambia el estado (nuevo movimiento aplicado / reinicio).
-  useEffect(() => {
-    actualizar(null, 0);
-    invalidate();
-  }, [version, actualizar, invalidate]);
-
-  // Arrancar la animación cuando llega un movimiento nuevo.
   useEffect(() => {
     progreso.current = 0;
     movimientoRef.current = movimiento;
     if (movimiento) invalidate();
   }, [movimiento, invalidate]);
 
+  // Al cambiar el estado (giro aplicado / reinicio) hay que repintar.
+  useEffect(() => {
+    invalidate();
+  }, [version, invalidate]);
+
   useFrame((_, delta) => {
-    const mov = movimientoRef.current;
-    if (!mov) return;
+    const actual = movimientoRef.current;
+    if (!actual || !grupoRef.current) return;
 
     progreso.current = Math.min(1, progreso.current + delta / DURACION_MOVIMIENTO);
-    actualizar(mov, progreso.current);
+    grupoRef.current.rotation.set(0, 0, 0);
+    grupoRef.current.rotation[actual.eje] = actual.angulo * progreso.current;
     invalidate();
 
     if (progreso.current >= 1) {
       movimientoRef.current = null;
-      alTerminar(mov);
+      alTerminar(actual);
     }
   });
 
+  const indice = movimiento ? indiceEje(movimiento.eje) : -1;
+  const esMovil = (sticker) =>
+    movimiento != null && sticker.posicion[indice] === movimiento.signo;
+
+  const moviles = stickers.filter(esMovil);
+  const estaticos = stickers.filter((sticker) => !esMovil(sticker));
+
   return (
     <>
-      <ambientLight intensity={0.9} />
-      <directionalLight position={[5, 7, 6]} intensity={0.75} />
-      <directionalLight position={[-6, -4, -6]} intensity={0.35} />
+      <ambientLight intensity={0.7} />
+      <directionalLight position={[6, 8, 6]} intensity={1.1} />
+      <directionalLight position={[-6, -4, -6]} intensity={0.4} />
 
-      <instancedMesh
-        ref={mallaRef}
-        args={[GEOMETRIA, MATERIAL, stickers.length]}
-        frustumCulled={false}
-        dispose={null}
-      />
+      <group scale={1.02}>
+        <RoundedBox args={[3.06, 3.06, 3.06]} radius={0.12} smoothness={4}>
+          <meshStandardMaterial color="#0a0e14" roughness={0.85} metalness={0.2} />
+        </RoundedBox>
+
+        {estaticos.map((sticker) => (
+          <Sticker key={sticker.id} sticker={sticker} />
+        ))}
+
+        <group ref={grupoRef}>
+          {moviles.map((sticker) => (
+            <Sticker key={sticker.id} sticker={sticker} />
+          ))}
+        </group>
+      </group>
 
       <OrbitControls
         enablePan={false}
@@ -162,6 +135,7 @@ export default function CuboRubik({
     stickersRef.current = crearStickers();
   }
 
+  const grupoRef = useRef(null);
   const colaRef = useRef([]);
   const encoladosRef = useRef(0);
 
@@ -249,8 +223,8 @@ export default function CuboRubik({
       {visible ? (
         <Canvas
           frameloop="demand"
-          dpr={1}
-          gl={{ antialias: true, powerPreference: "low-power" }}
+          dpr={[1, 2]}
+          gl={{ antialias: true }}
           camera={{ position: [4.5, 4, 6], fov: 40 }}
         >
           <color attach="background" args={["#141020"]} />
@@ -258,6 +232,7 @@ export default function CuboRubik({
             stickers={stickersRef.current}
             version={version}
             movimiento={movimiento}
+            grupoRef={grupoRef}
             alTerminar={alTerminar}
           />
         </Canvas>
