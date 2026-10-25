@@ -39,7 +39,7 @@ RETOS = [
         "RUBIK{sql_injection_101}",
         ["L"],
         "Un panel de administracion tiene un login vulnerable a SQL Injection. "
-        "Encuentra la flag en su base de datos.",
+        f"El servicio esta en {BASE_RETOS}:8001. Encuentra la flag en su base de datos.",
         f"{BASE_RETOS}:8001",
     ),
     (
@@ -62,8 +62,8 @@ RETOS = [
         200,
         "RUBIK{hidden_port}",
         ["F2"],
-        f"Escanea el host {HOST} con nmap (-p-). Hay un servicio en un puerto "
-        "no estandar; lee su banner y encontraras la flag.",
+        f"El servicio esta en {HOST}:31337. Identificalo con nmap (-sV) y "
+        "conectate para leer su banner; encontraras la flag.",
         "",
     ),
     (
@@ -74,8 +74,8 @@ RETOS = [
         350,
         "RUBIK{service_banner}",
         ["B'"],
-        f"Escanea el host {HOST} con nmap -sV. La version de uno de los "
-        "servicios revela la flag.",
+        f"El servicio esta en {HOST}:8003. Escanealo con nmap -sV; la version "
+        "del servicio revela la flag.",
         "",
     ),
 ]
@@ -118,7 +118,7 @@ class Command(BaseCommand):
             descripcion,
             objetivo,
         ) in RETOS:
-            reto, creado = Reto.objects.get_or_create(
+            reto, creado = Reto.objects.update_or_create(
                 slug=slug,
                 defaults={
                     "nombre": nombre,
@@ -140,9 +140,6 @@ class Command(BaseCommand):
                         orden=orden,
                     )
                 creados += 1
-            elif reto.objetivo != objetivo:
-                reto.objetivo = objetivo
-                reto.save(update_fields=["objetivo"])
 
         if options.get("limpiar"):
             slugs_validos = [reto[1] for reto in RETOS]
