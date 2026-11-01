@@ -90,6 +90,19 @@ RETOS = [
         "Publica un comentario que robe la cookie del bot administrador.",
         f"{BASE_RETOS}:8004",
     ),
+    (
+        "Banco central",
+        "banco-central",
+        "web",
+        "media",
+        500,
+        "RUBIK{sqli_banco_luis_miguel}",
+        ["D2"],
+        f"El buscador de clientes del banco esta en {BASE_RETOS}:8005 y es "
+        "vulnerable a SQL Injection. Hay una tabla de credenciales; el usuario "
+        "'luis.miguel' tiene su contrasena en Base64. Decodificala para obtener la flag.",
+        f"{BASE_RETOS}:8005",
+    ),
 ]
 
 

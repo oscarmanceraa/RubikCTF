@@ -67,6 +67,22 @@ services:
     cpus: 1.0
     shm_size: 256mb
 
+  web-sqli-banco:
+    build:
+      context: ./web-sqli-banco
+    container_name: reto-web-sqli-banco
+    environment:
+      RETO_FLAG: RUBIK{sqli_banco_luis_miguel}
+    ports:
+      - "8005:5000"
+    networks:
+      - retos
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 128m
+    cpus: 0.25
+
 networks:
   retos:
     driver: bridge
