@@ -6,6 +6,15 @@ import CuboRubik from "../componentes/CuboRubikLazy.jsx";
 import TarjetaReto from "../componentes/TarjetaReto.jsx";
 import { useAutenticacion } from "../contexto/ContextoAutenticacion.jsx";
 
+const CONFETI = Array.from({ length: 22 }, (_, i) => ({
+  left: (i * 4.7 + 2) % 100,
+  color: ["#2ecc71", "#ff4d4d", "#3b82f6", "#ffd23f", "#ff8c1a", "#f2f2f2", "#7c5cff"][
+    i % 7
+  ],
+  delay: (i * 0.13) % 2.6,
+  dur: 2.2 + (i % 5) * 0.25,
+}));
+
 export default function Panel() {
   const { usuario } = useAutenticacion();
   const [retos, setRetos] = useState([]);
@@ -41,6 +50,39 @@ export default function Panel() {
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
         <div className="space-y-8">
+          {cubo?.cubo_resuelto ? (
+            <div className="relative overflow-hidden rounded-2xl border border-acento/40 bg-superficie p-6 text-center">
+              <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+                {CONFETI.map((confeti, indice) => (
+                  <span
+                    key={indice}
+                    className="confeti"
+                    style={{
+                      left: `${confeti.left}%`,
+                      backgroundColor: confeti.color,
+                      animationDelay: `${confeti.delay}s`,
+                      animationDuration: `${confeti.dur}s`,
+                    }}
+                  />
+                ))}
+              </div>
+              <p className="text-sm font-medium text-acento-suave">Completado</p>
+              <h2 className="mt-1 text-3xl font-bold tracking-tight">¡Cubo resuelto!</h2>
+              <p className="mx-auto mt-2 max-w-md text-sm text-apagado">
+                Has resuelto los {total} retos y completado el cubo. Eres oficialmente un
+                Rubik Master de RUBIK CTF.
+              </p>
+              <div className="mt-4 flex flex-wrap justify-center gap-2 text-sm">
+                <span className="rounded-full border border-borde px-3 py-1">
+                  {usuario?.puntuacion ?? 0} pts
+                </span>
+                <span className="rounded-full border border-borde px-3 py-1">
+                  {resueltos}/{total} retos
+                </span>
+              </div>
+            </div>
+          ) : null}
+
           <div className="panel p-6">
             <div className="flex flex-wrap items-end justify-between gap-6">
               <div>
@@ -69,11 +111,6 @@ export default function Panel() {
                   style={{ width: `${porcentaje}%` }}
                 />
               </div>
-              {cubo?.cubo_resuelto ? (
-                <p className="mt-3 text-sm font-medium text-acento-suave">
-                  Cubo resuelto. Enhorabuena.
-                </p>
-              ) : null}
             </div>
           </div>
 
@@ -103,7 +140,7 @@ export default function Panel() {
 
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <h2 className="mb-3 text-xl font-semibold">Tu cubo</h2>
-          <CuboRubik inicial={cubo?.secuencia || []} />
+          <CuboRubik inicial={cubo?.secuencia || []} listo={Boolean(cubo)} />
           <p className="mt-3 text-sm text-apagado">
             {cubo?.cubo_resuelto
               ? "Cubo resuelto. Has completado todos los retos."

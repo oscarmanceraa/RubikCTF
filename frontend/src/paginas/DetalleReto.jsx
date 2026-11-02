@@ -11,7 +11,7 @@ export default function DetalleReto() {
   const { cargarPerfil } = useAutenticacion();
 
   const [reto, setReto] = useState(null);
-  const [inicial, setInicial] = useState([]);
+  const [inicial, setInicial] = useState(null);
   const [animar, setAnimar] = useState([]);
   const [flag, setFlag] = useState("");
   const [resultado, setResultado] = useState(null);
@@ -34,7 +34,7 @@ export default function DetalleReto() {
         const { data } = await cliente.get("cubo/");
         setInicial(data.secuencia || []);
       } catch (fallo) {
-        // sin cubo disponible; se ignora
+        setInicial([]);
       }
     })();
   }, [slug]);
@@ -186,7 +186,7 @@ export default function DetalleReto() {
 
       <div className="mt-6">
         <h2 className="mb-3 text-xl font-semibold">Tu cubo</h2>
-        <CuboRubik inicial={inicial} movimientos={animar} />
+        <CuboRubik inicial={inicial || []} movimientos={animar} listo={inicial !== null} />
       </div>
     </section>
   );

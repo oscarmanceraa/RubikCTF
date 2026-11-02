@@ -1,6 +1,6 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, RoundedBox } from "@react-three/drei";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   COLORES_CARA,
@@ -13,9 +13,9 @@ import {
   radianes,
 } from "../cubo/motor.js";
 
-const DURACION_MOVIMIENTO = 0.35;
+const DURACION_MOVIMIENTO = 0.45;
 const SEPARACION = 1.0;
-const OFFSET_STICKER = 0.5 + 0.02;
+const OFFSET_STICKER = 0.5;
 
 const ROTACION_NORMAL = {
   "0,0,1": [0, 0, 0],
@@ -26,23 +26,40 @@ const ROTACION_NORMAL = {
   "0,-1,0": [Math.PI / 2, 0, 0],
 };
 
-function Sticker({ sticker }) {
-  const [px, py, pz] = sticker.posicion;
-  const [nx, ny, nz] = sticker.normal;
-  const posicion = [
-    px * SEPARACION + nx * OFFSET_STICKER,
-    py * SEPARACION + ny * OFFSET_STICKER,
-    pz * SEPARACION + nz * OFFSET_STICKER,
-  ];
-  const rotacion = ROTACION_NORMAL[`${nx},${ny},${nz}`];
+function suavizar(t) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
 
+function agruparCubies(stickers) {
+  const mapa = new Map();
+  for (const sticker of stickers) {
+    const clave = sticker.posicion.join(",");
+    let cubie = mapa.get(clave);
+    if (!cubie) {
+      cubie = { posicion: sticker.posicion, stickers: [] };
+      mapa.set(clave, cubie);
+    }
+    cubie.stickers.push(sticker);
+  }
+  return [...mapa.values()];
+}
+
+function claveCubie(cubie) {
+  return cubie.stickers
+    .map((sticker) => sticker.id)
+    .sort((a, b) => a - b)
+    .join("-");
+}
+
+function Sticker({ sticker }) {
+  const [nx, ny, nz] = sticker.normal;
   return (
     <RoundedBox
-      args={[0.92, 0.92, 0.08]}
-      radius={0.06}
-      smoothness={3}
-      position={posicion}
-      rotation={rotacion}
+      args={[0.9, 0.9, 0.06]}
+      radius={0.05}
+      smoothness={2}
+      position={[nx * OFFSET_STICKER, ny * OFFSET_STICKER, nz * OFFSET_STICKER]}
+      rotation={ROTACION_NORMAL[`${nx},${ny},${nz}`]}
     >
       <meshStandardMaterial
         color={COLORES_CARA[sticker.color]}
@@ -50,6 +67,20 @@ function Sticker({ sticker }) {
         metalness={0.15}
       />
     </RoundedBox>
+  );
+}
+
+function Cubie({ cubie }) {
+  const [x, y, z] = cubie.posicion;
+  return (
+    <group position={[x * SEPARACION, y * SEPARACION, z * SEPARACION]}>
+      <RoundedBox args={[0.97, 0.97, 0.97]} radius={0.06} smoothness={1}>
+        <meshStandardMaterial color="#140f22" roughness={0.85} metalness={0.2} />
+      </RoundedBox>
+      {cubie.stickers.map((sticker) => (
+        <Sticker key={sticker.id} sticker={sticker} />
+      ))}
+    </group>
   );
 }
 
@@ -61,10 +92,12 @@ function Escena({ stickers, version, movimiento, grupoRef, alTerminar }) {
   useEffect(() => {
     progreso.current = 0;
     movimientoRef.current = movimiento;
+    if (grupoRef.current) {
+      grupoRef.current.rotation.set(0, 0, 0);
+    }
     if (movimiento) invalidate();
-  }, [movimiento, invalidate]);
+  }, [movimiento, invalidate, grupoRef]);
 
-  // Al cambiar el estado (giro aplicado / reinicio) hay que repintar.
   useEffect(() => {
     invalidate();
   }, [version, invalidate]);
@@ -75,7 +108,7 @@ function Escena({ stickers, version, movimiento, grupoRef, alTerminar }) {
 
     progreso.current = Math.min(1, progreso.current + delta / DURACION_MOVIMIENTO);
     grupoRef.current.rotation.set(0, 0, 0);
-    grupoRef.current.rotation[actual.eje] = actual.angulo * progreso.current;
+    grupoRef.current.rotation[actual.eje] = actual.angulo * suavizar(progreso.current);
     invalidate();
 
     if (progreso.current >= 1) {
@@ -84,31 +117,28 @@ function Escena({ stickers, version, movimiento, grupoRef, alTerminar }) {
     }
   });
 
-  const indice = movimiento ? indiceEje(movimiento.eje) : -1;
-  const esMovil = (sticker) =>
-    movimiento != null && sticker.posicion[indice] === movimiento.signo;
+  const cubies = useMemo(() => agruparCubies(stickers), [stickers, version]);
 
-  const moviles = stickers.filter(esMovil);
-  const estaticos = stickers.filter((sticker) => !esMovil(sticker));
+  const indice = movimiento ? indiceEje(movimiento.eje) : -1;
+  const esMovil = (cubie) =>
+    movimiento != null && cubie.posicion[indice] === movimiento.signo;
+
+  const moviles = cubies.filter(esMovil);
+  const estaticos = cubies.filter((cubie) => !esMovil(cubie));
 
   return (
     <>
-      <ambientLight intensity={0.7} />
-      <directionalLight position={[6, 8, 6]} intensity={1.1} />
+      <ambientLight intensity={0.8} />
+      <directionalLight position={[6, 8, 6]} intensity={1.0} />
       <directionalLight position={[-6, -4, -6]} intensity={0.4} />
 
       <group scale={1.02}>
-        <RoundedBox args={[3.06, 3.06, 3.06]} radius={0.12} smoothness={4}>
-          <meshStandardMaterial color="#0a0e14" roughness={0.85} metalness={0.2} />
-        </RoundedBox>
-
-        {estaticos.map((sticker) => (
-          <Sticker key={sticker.id} sticker={sticker} />
+        {estaticos.map((cubie) => (
+          <Cubie key={claveCubie(cubie)} cubie={cubie} />
         ))}
-
         <group ref={grupoRef}>
-          {moviles.map((sticker) => (
-            <Sticker key={sticker.id} sticker={sticker} />
+          {moviles.map((cubie) => (
+            <Cubie key={claveCubie(cubie)} cubie={cubie} />
           ))}
         </group>
       </group>
@@ -117,7 +147,7 @@ function Escena({ stickers, version, movimiento, grupoRef, alTerminar }) {
         enablePan={false}
         enableDamping={false}
         minDistance={5}
-        maxDistance={14}
+        maxDistance={16}
         rotateSpeed={0.6}
       />
     </>
@@ -127,12 +157,17 @@ function Escena({ stickers, version, movimiento, grupoRef, alTerminar }) {
 export default function CuboRubik({
   inicial = [],
   movimientos = [],
+  listo = true,
   className = "panel aspect-square w-full overflow-hidden",
   pie = true,
 }) {
   const stickersRef = useRef(null);
-  if (stickersRef.current === null) {
-    stickersRef.current = crearStickers();
+  if (stickersRef.current === null && listo) {
+    const nuevos = crearStickers();
+    for (const notacion of inicial) {
+      aplicarMovimiento(nuevos, notacion);
+    }
+    stickersRef.current = nuevos;
   }
 
   const grupoRef = useRef(null);
@@ -177,16 +212,18 @@ export default function CuboRubik({
 
   // (Re)construir el cubo con el estado inicial, sin animar.
   useEffect(() => {
-    stickersRef.current = crearStickers();
+    if (!listo) return;
+    const nuevos = crearStickers();
+    for (const notacion of inicial || []) {
+      aplicarMovimiento(nuevos, notacion);
+    }
+    stickersRef.current = nuevos;
     colaRef.current = [];
     encoladosRef.current = 0;
     setMovimiento(null);
-    for (const notacion of inicial || []) {
-      aplicarMovimiento(stickersRef.current, notacion);
-    }
     setVersion((valor) => valor + 1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [claveInicial]);
+  }, [claveInicial, listo]);
 
   // Encolar movimientos nuevos para animarlos.
   useEffect(() => {
@@ -220,7 +257,7 @@ export default function CuboRubik({
 
   return (
     <div ref={contenedorRef} className={className}>
-      {visible ? (
+      {listo && visible && stickersRef.current ? (
         <Canvas
           frameloop="demand"
           dpr={[1, 2]}
