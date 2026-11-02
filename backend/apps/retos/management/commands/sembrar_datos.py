@@ -138,10 +138,12 @@ RETOS = [
         400,
         "RUBIK{hydra_extranet}",
         ["U2"],
-        f"La extranet de Nexora esta en {BASE_RETOS}:8009. El usuario es 'admin'. "
-        "Descarga la lista filtrada en /lista.txt y fuerza el login con hydra "
-        "(http-post-form); la respuesta correcta NO contiene 'incorrectas'. "
-        "Entra al panel para ver la flag.",
+        f"Incidente Boreal: una campana de phishing filtro una lista de "
+        f"contrasenas antiguas de Nexora. La cuenta 'admin' de la extranet "
+        f"({BASE_RETOS}:8009) nunca se roto y usa una de esas contrasenas. "
+        "Descarga /lista.txt, fuerza el login con hydra (http-post-form; la "
+        "respuesta correcta NO contiene 'incorrectas') y recupera el codigo "
+        "de auditoria del panel.",
         f"{BASE_RETOS}:8009",
     ),
 ]

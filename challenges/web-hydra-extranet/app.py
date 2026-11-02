@@ -73,6 +73,16 @@ ESTILO = """
   .doc p{color:var(--muted);font-size:14px;line-height:1.6;margin:0 0 14px}
   .secreto{padding:16px 18px;border-radius:12px;background:#0a1622;border:1px solid #1f5c46;
     color:#7CF2A8;font-family:ui-monospace,monospace;font-size:15px;word-break:break-word}
+  .aviso{margin-top:16px;font-size:12px;color:var(--muted)}
+  .aviso a{color:var(--indigo2)}
+  .memo{max-width:640px;margin:0 auto;width:100%}
+  .memo h1{font-size:28px;margin:0 0 4px}
+  .memo .sub{color:var(--muted);margin:0 0 20px}
+  .memo .doc{padding:24px}
+  .memo .doc p{font-size:14px;line-height:1.7;color:#c9cff0;margin:0 0 14px}
+  .memo .meta{font-size:12px;color:var(--muted);border-bottom:1px solid var(--borde);
+    padding-bottom:12px;margin-bottom:16px}
+  .memo .doc a{color:var(--indigo2);text-decoration:underline}
 </style>
 """
 
@@ -91,6 +101,7 @@ LOGIN = (
     "<label>Contraseña</label><input name='contrasena' type='password'>"
     "<button type='submit'>Entrar</button></form>"
     "{% if error %}<div class='error'>{{ error }}</div>{% endif %}"
+    "<p class='aviso'>Incidente Boreal: <a href='/comunicado'>lee el comunicado de Seguridad</a>.</p>"
     "</div></main></body></html>"
 )
 
@@ -108,6 +119,30 @@ PANEL = (
     "<p>Solo el personal autorizado puede ver este contenido.</p>"
     "<div class='secreto'>{{ flag }}</div></div>"
     "</div></main></body></html>"
+)
+
+COMUNICADO = (
+    "<!doctype html><html lang='es'><head><meta charset='utf-8'>"
+    "<meta name='viewport' content='width=device-width, initial-scale=1'>"
+    "<title>Nexora - Incidente Boreal</title>" + ESTILO + "</head><body>"
+    "<header class='topbar'><div class='marca'><div class='logo'>N</div>"
+    "<div><strong>Nexora</strong><span>Seguridad</span></div></div>"
+    "<nav><a href='/'>Acceso</a></nav></header>"
+    "<main><div class='memo'>"
+    "<span class='tag'>Comunicado interno</span>"
+    "<h1>Incidente Boreal</h1>"
+    "<p class='sub'>Dirección de Seguridad · Nexora Labs</p>"
+    "<div class='doc panel'>"
+    "<p class='meta'>De: Seguridad de la Información · Para: toda la plantilla · Marzo 2026</p>"
+    "<p>Durante la campaña de concienciación de marzo detectamos que varios empleados "
+    "introdujeron sus credenciales en una web de phishing que imitaba el portal de RRHH. "
+    "El atacante recopiló una lista de contraseñas antiguas que todavía circula por el "
+    "recurso compartido interno (<a href='/lista.txt'>lista.txt</a>).</p>"
+    "<p>La auditoría reveló que la cuenta <b>admin</b> de la extranet nunca se rotó y "
+    "sigue usando una de esas contraseñas débiles.</p>"
+    "<p>Tu tarea como respuesta a incidentes es verificar el alcance del acceso: entra "
+    "en el panel interno y recupera el <b>código de auditoría</b> para cerrar el caso.</p>"
+    "</div></div></main></body></html>"
 )
 
 
@@ -142,6 +177,11 @@ def logout():
 @app.get("/lista.txt")
 def lista():
     return app.response_class("\n".join(PALABRAS) + "\n", mimetype="text/plain")
+
+
+@app.get("/comunicado")
+def comunicado():
+    return render_template_string(COMUNICADO)
 
 
 if __name__ == "__main__":
