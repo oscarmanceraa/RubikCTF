@@ -19,9 +19,10 @@ def main() -> None:
             conexion, _ = servidor.accept()
             with conexion:
                 mensaje = (
-                    "RUBIK CTF - servicio interno v1.0\r\n"
-                    "No deberias haber encontrado este puerto.\r\n"
-                    f"Flag: {FLAG}\r\n"
+                    "Aurora Backup Service v2.4\r\n"
+                    "Servidor de respaldos listo.\r\n"
+                    "Este servicio solo admite conexiones autenticadas.\r\n"
+                    f"Clave de sesion de respaldo: {FLAG}\r\n"
                 )
                 conexion.sendall(mensaje.encode())
                 conexion.close()
