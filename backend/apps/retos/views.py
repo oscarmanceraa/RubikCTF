@@ -8,11 +8,20 @@ from rest_framework.views import APIView
 
 from . import cube_engine
 from . import flags as utilidades_flag
-from .models import Categoria, Intento, ProgresoCubo, Reto, RetoResuelto
+from .models import (
+    Categoria,
+    Intento,
+    PistaDesbloqueada,
+    PreguntaMascota,
+    ProgresoCubo,
+    Reto,
+    RetoResuelto,
+)
 from .serializers import (
     SerializadorCategoria,
     SerializadorClasificacion,
     SerializadorEnvioFlag,
+    SerializadorRespuestaMascota,
     SerializadorRetoDetalle,
     SerializadorRetoLista,
 )
@@ -182,6 +191,61 @@ class VistaEstadoCubo(APIView):
                 "cubo": cube_engine.estado_desde_movimientos(secuencia),
                 "cubo_resuelto": cube_engine.esta_resuelto(secuencia),
             }
+        )
+
+
+def _pregunta_de_reto(reto):
+    return (
+        PreguntaMascota.objects.filter(activa=True, pista__reto=reto, pista__activa=True)
+        .select_related("pista")
+        .first()
+    )
+
+
+class VistaMascotaReto(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, slug):
+        reto = get_object_or_404(Reto, slug=slug, activo=True)
+        pregunta = _pregunta_de_reto(reto)
+        if not pregunta:
+            return Response({"disponible": False})
+        desbloqueada = PistaDesbloqueada.objects.filter(
+            usuario=request.user, pista=pregunta.pista
+        ).exists()
+        return Response(
+            {
+                "disponible": True,
+                "texto": pregunta.texto,
+                "tema": pregunta.tema,
+                "pista_desbloqueada": desbloqueada,
+                "pista": pregunta.pista.texto if desbloqueada else None,
+            }
+        )
+
+    def post(self, request, slug):
+        reto = get_object_or_404(Reto, slug=slug, activo=True)
+        pregunta = _pregunta_de_reto(reto)
+        if not pregunta:
+            return Response({"disponible": False}, status=status.HTTP_404_NOT_FOUND)
+
+        serializador = SerializadorRespuestaMascota(data=request.data)
+        serializador.is_valid(raise_exception=True)
+
+        if pregunta.comprobar_respuesta(serializador.validated_data["respuesta"]):
+            PistaDesbloqueada.objects.get_or_create(
+                usuario=request.user, pista=pregunta.pista
+            )
+            return Response(
+                {
+                    "correcto": True,
+                    "mensaje": "¡Correcto! Aquí tienes una pista.",
+                    "pista": pregunta.pista.texto,
+                }
+            )
+
+        return Response(
+            {"correcto": False, "mensaje": "No es correcto. Inténtalo de nuevo."}
         )
 
 

@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import { cliente } from "../api/cliente.js";
 import CuboRubik from "../componentes/CuboRubikLazy.jsx";
 import InsigniaDificultad from "../componentes/InsigniaDificultad.jsx";
+import Mascota from "../componentes/Mascota.jsx";
 import { useAutenticacion } from "../contexto/ContextoAutenticacion.jsx";
 
 export default function DetalleReto() {
@@ -182,6 +183,10 @@ export default function DetalleReto() {
             ) : null}
           </div>
         ) : null}
+      </div>
+
+      <div className="mt-6">
+        <Mascota slug={slug} />
       </div>
 
       <div className="mt-6">

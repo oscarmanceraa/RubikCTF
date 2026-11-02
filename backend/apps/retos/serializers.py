@@ -71,6 +71,10 @@ class SerializadorEnvioFlag(serializers.Serializer):
     flag = serializers.CharField(max_length=300, trim_whitespace=True)
 
 
+class SerializadorRespuestaMascota(serializers.Serializer):
+    respuesta = serializers.CharField(max_length=200, trim_whitespace=True)
+
+
 class SerializadorClasificacion(serializers.ModelSerializer):
     usuario = serializers.CharField(source="username", read_only=True)
     retos_resueltos = serializers.IntegerField(read_only=True)

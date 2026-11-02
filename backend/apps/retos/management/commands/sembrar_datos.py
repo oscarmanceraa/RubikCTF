@@ -14,7 +14,14 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from apps.retos.cube_engine import MOVIMIENTOS
-from apps.retos.models import Categoria, MovimientoCubo, MovimientoReto, Reto
+from apps.retos.models import (
+    Categoria,
+    MovimientoCubo,
+    MovimientoReto,
+    Pista,
+    PreguntaMascota,
+    Reto,
+)
 
 BASE_RETOS = os.environ.get("HOST_RETOS", "http://192.168.56.77").rstrip("/")
 HOST = BASE_RETOS.replace("http://", "").replace("https://", "")
@@ -148,6 +155,64 @@ RETOS = [
     ),
 ]
 
+# slug -> (pregunta, respuesta_normalizada, tema, pista_basica)
+MASCOTA = {
+    "acceso-al-panel": (
+        "¿Qué palabra clave SQL une los resultados de dos consultas?",
+        "union",
+        "sql",
+        "El login concatena tu usuario. Cierra la comilla y comenta el resto con -- para saltarte la contraseña.",
+    ),
+    "credenciales-pcap": (
+        "¿Qué esquema de autenticación HTTP envía usuario:contraseña codificado en Base64?",
+        "basic",
+        "http",
+        "En Wireshark filtra por http y busca la cabecera Authorization; después decodifica el Base64.",
+    ),
+    "puerto-inesperado": (
+        "¿Qué protocolo orientado a conexión devuelve un banner al conectar a un puerto?",
+        "tcp",
+        "redes",
+        "Escanea todos los puertos con nmap y conecta con nc al que no esperabas; el banner trae la flag.",
+    ),
+    "banner-revelador": (
+        "¿Qué opción de nmap (sin el guion) detecta la versión de los servicios?",
+        "sv",
+        "redes",
+        "Usa la detección de versiones; la cabecera del servidor delata la flag.",
+    ),
+    "xss-almacenado": (
+        "¿Qué objeto de JavaScript contiene las cookies de la página?",
+        "document.cookie",
+        "xss",
+        "El comentario se guarda sin escapar. Haz que el bot envíe su cookie al libro.",
+    ),
+    "banco-central": (
+        "¿Qué palabra clave SQL une el resultado de otra consulta al original?",
+        "union",
+        "sql",
+        "El buscador es inyectable. Con UNION puedes leer la tabla de credenciales.",
+    ),
+    "diagnostico-red": (
+        "¿Qué carácter permite encadenar comandos en la shell de Linux? (escríbelo)",
+        ";",
+        "linux",
+        "La entrada se pega a un comando. Encadena el tuyo y ábrete una shell con Python y PTY.",
+    ),
+    "receta-manipulada": (
+        "¿Qué lenguaje se ejecuta en el servidor con extensión .php?",
+        "php",
+        "web",
+        "Solo se valida la última extensión. Prueba una doble extensión como receta.php.jpg.",
+    ),
+    "extranet-hydra": (
+        "¿Qué herramienta de Kali se usa para fuerza bruta de formularios?",
+        "hydra",
+        "fuerza bruta",
+        "Descarga la lista filtrada y prueba con Hydra; la respuesta correcta no contiene 'incorrectas'.",
+    ),
+}
+
 
 class Command(BaseCommand):
     help = "Crea categorias, movimientos y retos (idempotente)."
@@ -208,6 +273,26 @@ class Command(BaseCommand):
                         orden=orden,
                     )
                 creados += 1
+
+        # Mascota: una pregunta por reto y su pista basica.
+        for slug, (pregunta, respuesta, tema, texto_pista) in MASCOTA.items():
+            reto = Reto.objects.filter(slug=slug).first()
+            if not reto:
+                continue
+            pista, _ = Pista.objects.update_or_create(
+                reto=reto,
+                orden=0,
+                defaults={"texto": texto_pista, "coste": 0, "activa": True},
+            )
+            PreguntaMascota.objects.update_or_create(
+                pista=pista,
+                defaults={
+                    "texto": pregunta,
+                    "respuesta": respuesta,
+                    "tema": tema,
+                    "activa": True,
+                },
+            )
 
         if options.get("limpiar"):
             slugs_validos = [reto[1] for reto in RETOS]
