@@ -103,6 +103,19 @@ RETOS = [
         "'luis.miguel' tiene su contrasena en Base64. Decodificala para obtener la flag.",
         f"{BASE_RETOS}:8005",
     ),
+    (
+        "Diagnostico de red",
+        "diagnostico-red",
+        "web",
+        "dificil",
+        700,
+        "RUBIK{reverse_shell_vault}",
+        ["F"],
+        f"La consola de diagnostico de AuroraVault esta en {BASE_RETOS}:8006 y "
+        "ejecuta comandos del sistema (la salida no se muestra). Consigue una "
+        "reverse shell a tu maquina y lee /flag.txt para obtener la flag.",
+        f"{BASE_RETOS}:8006",
+    ),
 ]
 
 

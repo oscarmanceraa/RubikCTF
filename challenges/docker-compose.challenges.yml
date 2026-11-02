@@ -83,6 +83,20 @@ services:
     mem_limit: 128m
     cpus: 0.25
 
+  web-rce-diagnostico:
+    build:
+      context: ./web-rce-diagnostico
+    container_name: reto-web-rce-diagnostico
+    ports:
+      - "8006:5000"
+    networks:
+      - retos
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 128m
+    cpus: 0.5
+
 networks:
   retos:
     driver: bridge
