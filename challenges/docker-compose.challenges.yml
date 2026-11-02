@@ -111,6 +111,20 @@ services:
     mem_limit: 256m
     cpus: 0.5
 
+  web-hydra-extranet:
+    build:
+      context: ./web-hydra-extranet
+    container_name: reto-web-hydra-extranet
+    ports:
+      - "8009:5000"
+    networks:
+      - retos
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 128m
+    cpus: 0.25
+
 networks:
   retos:
     driver: bridge

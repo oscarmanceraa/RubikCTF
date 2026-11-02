@@ -130,6 +130,20 @@ RETOS = [
         "Consigue ejecutar codigo en el servidor y lee /flag.txt.",
         f"{BASE_RETOS}:8007",
     ),
+    (
+        "Extranet de Nexora",
+        "extranet-hydra",
+        "web",
+        "media",
+        400,
+        "RUBIK{hydra_extranet}",
+        ["U2"],
+        f"La extranet de Nexora esta en {BASE_RETOS}:8009. El usuario es 'admin'. "
+        "Descarga la lista filtrada en /lista.txt y fuerza el login con hydra "
+        "(http-post-form); la respuesta correcta NO contiene 'incorrectas'. "
+        "Entra al panel para ver la flag.",
+        f"{BASE_RETOS}:8009",
+    ),
 ]
 
 
