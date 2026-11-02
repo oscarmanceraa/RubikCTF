@@ -100,8 +100,25 @@
   }
 }
 
+.mascota-flotar {
+  animation: mascota-flotar 3s ease-in-out infinite;
+}
+
+@keyframes mascota-flotar {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .confeti {
     display: none;
+  }
+  .mascota-flotar {
+    animation: none;
   }
 }

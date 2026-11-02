@@ -185,9 +185,7 @@ export default function DetalleReto() {
         ) : null}
       </div>
 
-      <div className="mt-6">
-        <Mascota slug={slug} />
-      </div>
+      <Mascota slug={slug} />
 
       <div className="mt-6">
         <h2 className="mb-3 text-xl font-semibold">Tu cubo</h2>
