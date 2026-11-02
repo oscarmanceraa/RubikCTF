@@ -76,7 +76,7 @@ RETOS = [
         ["B'"],
         f"El servicio esta en {HOST}:8003. Escanealo con nmap -sV; la version "
         "del servicio revela la flag.",
-        "",
+        f"{BASE_RETOS}:8003",
     ),
     (
         "XSS almacenado",
