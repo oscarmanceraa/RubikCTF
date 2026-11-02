@@ -112,8 +112,9 @@ RETOS = [
         "RUBIK{reverse_shell_vault}",
         ["F"],
         f"La consola de diagnostico de AuroraVault esta en {BASE_RETOS}:8006 y "
-        "ejecuta comandos del sistema (la salida no se muestra). Consigue una "
-        "reverse shell a tu maquina y lee /flag.txt para obtener la flag.",
+        "ejecuta comandos del sistema (la salida no se muestra). El contenedor "
+        "no tiene bash ni netcat: consigue una reverse shell con PTY usando "
+        "python3 y lee /flag.txt.",
         f"{BASE_RETOS}:8006",
     ),
 ]
