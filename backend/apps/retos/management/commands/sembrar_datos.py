@@ -117,6 +117,19 @@ RETOS = [
         "python3 y lee /flag.txt.",
         f"{BASE_RETOS}:8006",
     ),
+    (
+        "Receta manipulada",
+        "receta-manipulada",
+        "web",
+        "media",
+        450,
+        "RUBIK{file_upload_doble_extension}",
+        ["F'"],
+        f"El portal de recetas de Clinica Vita esta en {BASE_RETOS}:8007. Solo "
+        "acepta imagenes o PDF y bloquea las extensiones .php... o eso parece. "
+        "Consigue ejecutar codigo en el servidor y lee /flag.txt.",
+        f"{BASE_RETOS}:8007",
+    ),
 ]
 
 

@@ -97,6 +97,20 @@ services:
     mem_limit: 128m
     cpus: 0.5
 
+  web-upload-clinica:
+    build:
+      context: ./web-upload-clinica
+    container_name: reto-web-upload-clinica
+    ports:
+      - "8007:80"
+    networks:
+      - retos
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 256m
+    cpus: 0.5
+
 networks:
   retos:
     driver: bridge
