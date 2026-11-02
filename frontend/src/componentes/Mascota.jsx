@@ -36,11 +36,18 @@ export default function Mascota({ slug }) {
   useEffect(() => {
     let activo = true;
     (async () => {
-      try {
-        const { data } = await cliente.get(`retos/${slug}/mascota/`);
-        if (activo) setPregunta(data);
-      } catch (fallo) {
-        if (activo) setPregunta(null);
+      for (let intento = 0; intento < 3; intento += 1) {
+        try {
+          const { data } = await cliente.get(`retos/${slug}/mascota/`);
+          if (activo) setPregunta(data);
+          return;
+        } catch (fallo) {
+          if (intento === 2) {
+            if (activo) setPregunta(null);
+            return;
+          }
+          await new Promise((resolver) => setTimeout(resolver, 700 * (intento + 1)));
+        }
       }
     })();
     return () => {
