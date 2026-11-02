@@ -158,7 +158,7 @@ export default function CuboRubik({
   inicial = [],
   movimientos = [],
   listo = true,
-  className = "panel aspect-square w-full overflow-hidden",
+  className = "panel h-[400px] w-full overflow-hidden",
   pie = true,
 }) {
   const stickersRef = useRef(null);
