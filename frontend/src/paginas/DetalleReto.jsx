@@ -4,7 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import { cliente } from "../api/cliente.js";
 import CuboRubik from "../componentes/CuboRubikLazy.jsx";
 import InsigniaDificultad from "../componentes/InsigniaDificultad.jsx";
-import Mascota from "../componentes/Mascota.jsx";
+import Ayuda from "../componentes/Ayuda.jsx";
 import { useAutenticacion } from "../contexto/ContextoAutenticacion.jsx";
 
 export default function DetalleReto() {
@@ -185,7 +185,7 @@ export default function DetalleReto() {
         ) : null}
       </div>
 
-      <Mascota slug={slug} />
+      <Ayuda slug={slug} />
 
       <div className="mt-6">
         <h2 className="mb-3 text-xl font-semibold">Tu cubo</h2>
