@@ -85,11 +85,9 @@ export default function Ayuda({ slug }) {
     return null;
   }
 
-  const yaTiene = pregunta.pista_desbloqueada;
-
   let frase;
-  if (yaTiene) {
-    frase = recienAcertado ? "Tome, vea la pista." : "Ya le di la pista. No me moleste más.";
+  if (recienAcertado) {
+    frase = "Tome, vea la pista.";
   } else if (paso === 0) {
     frase = "¿Qué necesita?";
   } else if (paso === 1) {
@@ -144,7 +142,7 @@ export default function Ayuda({ slug }) {
 
                 <Burbuja>{frase}</Burbuja>
 
-                {yaTiene ? (
+                {recienAcertado ? (
                   <div className="rounded-xl border border-acento/40 bg-acento/10 p-3">
                     <p className="text-xs font-semibold text-acento-suave">Pista</p>
                     <p className="mt-1 text-sm text-tinta">{pregunta.pista}</p>
@@ -193,7 +191,7 @@ export default function Ayuda({ slug }) {
             <img
               src="/ayuda.png"
               alt="Ayuda"
-              className="h-full w-full scale-110 object-cover object-center"
+              className="h-full w-full scale-125 object-cover object-[50%_40%]"
             />
           </span>
         </button>
