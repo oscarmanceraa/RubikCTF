@@ -66,6 +66,14 @@ export default function App() {
           <Route path="*" element={<NoEncontrado />} />
         </Routes>
       </main>
+
+      <footer className="border-t border-borde px-4 py-6 text-center text-xs text-apagado">
+        <p>
+          Desarrollado por <span className="text-tinta">Oscar Mancera</span>,{" "}
+          <span className="text-tinta">Miguel Munar</span> y{" "}
+          <span className="text-tinta">Diego Vacca</span>
+        </p>
+      </footer>
     </div>
   );
 }

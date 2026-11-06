@@ -70,6 +70,13 @@ export default function Inicio() {
           ))}
         </ul>
       </div>
+
+      <p className="mt-10 text-center text-xs text-apagado">
+        Desarrollado por{" "}
+        <span className="text-tinta">Oscar Mancera</span>,{" "}
+        <span className="text-tinta">Miguel Munar</span> y{" "}
+        <span className="text-tinta">Diego Vacca</span>
+      </p>
     </section>
   );
 }

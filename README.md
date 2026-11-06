@@ -4,6 +4,10 @@ Plataforma CTF educativa con progreso representado por un cubo de Rubik.
 El participante resuelve retos, obtiene flags, gana puntos y desbloquea
 movimientos que el sistema aplica **automaticamente** al cubo.
 
+## Autores
+
+Proyecto desarrollado por **Oscar Mancera**, **Miguel Munar** y **Diego Vacca**.
+
 ## Stack
 
 - **Frontend:** React + Vite + Tailwind + Three.js / React Three Fiber
