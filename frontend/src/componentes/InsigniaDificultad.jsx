@@ -1,5 +1,5 @@
 const ESTILOS = {
-  facil: "border-[#2ecc71]/40 text-[#2ecc71]",
+  facil: "border-cube-green/40 text-cube-green",
   media: "border-acento/45 text-acento-suave",
   dificil: "border-aviso/45 text-aviso",
   experto: "border-peligro/45 text-peligro",

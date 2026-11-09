@@ -26,12 +26,12 @@ const CARA_POR_NORMAL = {
 
 // Colores tematicos: cara -> color.
 export const COLORES_CARA = {
-  U: "#f2f2f2", // blanco  -> OSINT / Esteganografia
-  D: "#ffd23f", // amarillo -> Forense
-  F: "#2ecc71", // verde    -> Web
-  B: "#2f80ed", // azul     -> Redes
-  R: "#ff3b3b", // rojo     -> Criptografia
-  L: "#ff8c1a", // naranja  -> Reversing
+  U: "#ffffff", // blanco  -> OSINT / Esteganografia
+  D: "#ffd500", // amarillo -> Forense
+  F: "#009b48", // verde    -> Web
+  B: "#0046ad", // azul     -> Redes
+  R: "#b71234", // rojo     -> Criptografia
+  L: "#ff5800", // naranja  -> Reversing
 };
 
 export function parsearMovimiento(movimiento) {

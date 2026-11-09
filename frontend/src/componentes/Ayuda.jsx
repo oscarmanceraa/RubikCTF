@@ -5,7 +5,7 @@ import Minijuego from "./Minijuego.jsx";
 
 function Burbuja({ children }) {
   return (
-    <div className="rounded-xl rounded-tl-sm border border-borde bg-panel-2 p-3 text-sm text-tinta">
+    <div className="rounded-xl rounded-tl-sm border border-borde bg-surface-elevated p-3 text-sm text-tinta">
       {children}
     </div>
   );
@@ -188,7 +188,7 @@ export default function Ayuda({ slug }) {
                 ) : resolved ? (
                   <div className="space-y-3">
                     {pregunta.pasos ? (
-                      <div className="rounded-xl border border-borde bg-panel-2 p-3">
+                      <div className="rounded-xl border border-borde bg-surface-elevated p-3">
                         <p className="text-xs font-semibold text-acento-suave">Pasos</p>
                         <p className="mt-1 whitespace-pre-line text-sm text-tinta">
                           {pregunta.pasos}
@@ -267,7 +267,7 @@ export default function Ayuda({ slug }) {
           type="button"
           onClick={abrir}
           aria-label="Abrir ayuda"
-          className="relative grid h-14 w-14 place-items-center rounded-full bg-acento text-2xl font-bold text-white shadow-[0_10px_30px_rgba(124,92,255,.45)] transition hover:scale-105"
+          className="relative grid h-14 w-14 place-items-center rounded-full bg-cube-yellow text-2xl font-bold text-surface-body shadow-[0_10px_30px_rgba(255,213,0,.45)] transition hover:scale-105"
         >
           ?
         </button>

@@ -1,19 +1,71 @@
 @import "tailwindcss";
 
-@theme {
-  --color-grafito: #141020;
-  --color-superficie: #1e1834;
-  --color-superficie-2: #272050;
-  --color-borde: #342b56;
-  --color-tinta: #f4f2ff;
-  --color-apagado: #a49dc4;
-  --color-acento: #7c5cff;
-  --color-acento-suave: #a48bff;
-  --color-peligro: #ff5470;
-  --color-aviso: #ffc24b;
+@font-face {
+  font-family: "Education Pencil";
+  src: url("/fonts/Geo-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  
+}
 
-  --font-sans: "Space Grotesk Variable", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", monospace;
+@theme {
+  /* Stickers del cubo */
+  --color-cube-white: #ffffff;
+  --color-cube-yellow: #ffd500;
+  --color-cube-red: #b71234;
+  --color-cube-orange: #ff5800;
+  --color-cube-blue: #0046ad;
+  --color-cube-green: #009b48;
+
+  /* Superficies */
+  --color-surface-body: #181822;
+  --color-surface: #17171b;
+  --color-surface-elevated: #23232a;
+  --color-line: #34343d;
+  --color-muted: #a6a6b3;
+
+  /* Aliases legados (para no romper paginas existentes) */
+  --color-grafito: #0d0d0f;
+  --color-superficie: #17171b;
+  --color-superficie-2: #23232a;
+  --color-borde: #34343d;
+  --color-tinta: #ffffff;
+  --color-apagado: #a6a6b3;
+  --color-acento: #ffd500;
+  --color-acento-suave: #ff5800;
+  --color-peligro: #b71234;
+  --color-aviso: #ff5800;
+
+  /* Tipografia */
+  --font-sans: "Education Pencil", "Space Grotesk Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, "Cascadia Code", monospace;
+
+  /* Radios */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  /* Contenedor */
+  --container-page: 1200px;
+
+  /* Foco */
+  --shadow-focus: 0 0 0 3px rgba(255, 213, 0, 0.25);
+
+  /* Animacion */
+  --animate-shake: shake 300ms ease-in-out;
+  @keyframes shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    25% {
+      transform: translateX(-6px);
+    }
+    75% {
+      transform: translateX(6px);
+    }
+  }
 }
 
 @layer base {
@@ -24,18 +76,29 @@
   }
 
   body {
-    @apply bg-grafito text-tinta antialiased;
+    @apply bg-surface-body text-cube-white antialiased;
     font-family: var(--font-sans);
-    background-image: radial-gradient(
-      70% 55% at 10% 0%,
-      rgba(124, 92, 255, 0.12),
-      transparent 70%
-    );
+    background-image:
+      radial-gradient(60% 50% at 8% 0%, rgba(255, 213, 0, 0.18), transparent 70%),
+      radial-gradient(55% 45% at 92% 8%, rgba(0, 70, 173, 0.22), transparent 70%),
+      radial-gradient(60% 50% at 50% 100%, rgba(0, 155, 72, 0.16), transparent 70%),
+      radial-gradient(45% 40% at 100% 55%, rgba(255, 88, 0, 0.16), transparent 70%),
+      radial-gradient(45% 40% at 0% 60%, rgba(183, 18, 52, 0.16), transparent 70%),
+      linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size:
+      auto,
+      auto,
+      auto,
+      auto,
+      auto,
+      48px 48px,
+      48px 48px;
     background-attachment: fixed;
   }
 
   :focus-visible {
-    @apply outline-none ring-2 ring-acento ring-offset-2 ring-offset-grafito;
+    @apply outline-none ring-[3px] ring-cube-yellow/40 ring-offset-2 ring-offset-surface-body;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -50,27 +113,50 @@
 
 @layer components {
   .panel {
-    @apply rounded-2xl border border-borde bg-superficie;
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--borde-tarjeta, var(--color-cube-yellow));
+    background-color: var(--color-surface);
   }
 
   .panel-2 {
-    @apply rounded-xl border border-borde bg-superficie-2;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--borde-tarjeta, var(--color-cube-yellow));
+    background-color: var(--color-surface-elevated);
+  }
+
+  .panel:nth-child(6n + 1) {
+    --borde-tarjeta: var(--color-cube-yellow);
+  }
+  .panel:nth-child(6n + 2) {
+    --borde-tarjeta: var(--color-cube-red);
+  }
+  .panel:nth-child(6n + 3) {
+    --borde-tarjeta: var(--color-cube-blue);
+  }
+  .panel:nth-child(6n + 4) {
+    --borde-tarjeta: var(--color-cube-green);
+  }
+  .panel:nth-child(6n + 5) {
+    --borde-tarjeta: var(--color-cube-orange);
+  }
+  .panel:nth-child(6n + 6) {
+    --borde-tarjeta: var(--color-cube-white);
   }
 
   .boton {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border border-borde px-4 py-2 text-sm font-medium text-tinta transition-colors hover:border-acento-suave hover:text-acento-suave disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-md border-2 border-cube-white px-6 py-3 text-sm font-medium text-cube-white transition-colors hover:bg-cube-white hover:text-surface-body disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .boton-primario {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-acento px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-acento-suave disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-cube-yellow px-6 py-3 text-sm font-semibold text-surface-body transition-colors hover:bg-cube-orange disabled:cursor-not-allowed disabled:bg-surface-elevated disabled:text-muted;
   }
 
   .campo {
-    @apply w-full rounded-xl border border-borde bg-grafito px-3 py-2 text-sm text-tinta outline-none placeholder:text-apagado/60 focus:border-acento;
+    @apply w-full rounded-sm border-2 border-line bg-surface-elevated px-4 py-3 text-sm text-cube-white outline-none placeholder:text-muted/60 focus:border-cube-yellow focus:shadow-focus;
   }
 
   .etiqueta {
-    @apply mb-1 block text-sm font-medium text-apagado;
+    @apply mb-1 block text-sm font-medium text-muted;
   }
 
   .confeti {

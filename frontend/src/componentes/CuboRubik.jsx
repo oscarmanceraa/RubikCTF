@@ -75,7 +75,7 @@ function Cubie({ cubie }) {
   return (
     <group position={[x * SEPARACION, y * SEPARACION, z * SEPARACION]}>
       <RoundedBox args={[0.97, 0.97, 0.97]} radius={0.06} smoothness={1}>
-        <meshStandardMaterial color="#140f22" roughness={0.85} metalness={0.2} />
+        <meshStandardMaterial color="#16161b" roughness={0.85} metalness={0.2} />
       </RoundedBox>
       {cubie.stickers.map((sticker) => (
         <Sticker key={sticker.id} sticker={sticker} />
@@ -261,10 +261,9 @@ export default function CuboRubik({
         <Canvas
           frameloop="demand"
           dpr={[1, 2]}
-          gl={{ antialias: true }}
+          gl={{ antialias: true, alpha: true }}
           camera={{ position: [4.5, 4, 6], fov: 40 }}
         >
-          <color attach="background" args={["#141020"]} />
           <Escena
             stickers={stickersRef.current}
             version={version}

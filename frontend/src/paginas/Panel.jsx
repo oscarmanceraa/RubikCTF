@@ -8,7 +8,7 @@ import { useAutenticacion } from "../contexto/ContextoAutenticacion.jsx";
 
 const CONFETI = Array.from({ length: 22 }, (_, i) => ({
   left: (i * 4.7 + 2) % 100,
-  color: ["#2ecc71", "#ff4d4d", "#3b82f6", "#ffd23f", "#ff8c1a", "#f2f2f2", "#7c5cff"][
+  color: ["#009b48", "#b71234", "#0046ad", "#ffd500", "#ff5800", "#ffffff", "#ffd500"][
     i % 7
   ],
   delay: (i * 0.13) % 2.6,

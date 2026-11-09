@@ -90,7 +90,7 @@ export default function DetalleReto() {
         <div className="flex items-center gap-2 text-sm text-apagado">
           <span
             className="h-2.5 w-2.5 rounded-full"
-            style={{ backgroundColor: reto.categoria?.color || "#7c5cff" }}
+            style={{ backgroundColor: reto.categoria?.color || "#ffd500" }}
           />
           {reto.categoria?.nombre}
           {reto.resuelto ? (

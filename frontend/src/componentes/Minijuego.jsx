@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 const COLORES_CUBO = {
-  U: "#f2f2f2",
-  R: "#ff3b3b",
-  F: "#2ecc71",
-  D: "#ffd23f",
-  L: "#ff8c1a",
-  B: "#2f80ed",
+  U: "#ffffff",
+  R: "#b71234",
+  F: "#009b48",
+  D: "#ffd500",
+  L: "#ff5800",
+  B: "#0046ad",
 };
 const LETRAS = ["R", "F", "B", "L", "D", "U"];
 
