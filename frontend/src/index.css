@@ -154,6 +154,7 @@
   height: 100%;
   object-fit: contain;
   pointer-events: none;
+  opacity: 0;
   animation: boss-explosion 1.4s ease-out;
 }
 
