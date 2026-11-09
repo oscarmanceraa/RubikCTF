@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { cliente } from "../api/cliente.js";
+import Minijuego from "./Minijuego.jsx";
 
 function Burbuja({ children }) {
   return (
@@ -18,7 +19,14 @@ export default function Ayuda({ slug }) {
   const [respuesta, setRespuesta] = useState("");
   const [errorRed, setErrorRed] = useState("");
   const [enviando, setEnviando] = useState(false);
-  const [recienAcertado, setRecienAcertado] = useState(false);
+  const [jugando, setJugando] = useState(false);
+  const [ganado, setGanado] = useState(false);
+  const [copiado, setCopiado] = useState(false);
+
+  async function cargar() {
+    const { data } = await cliente.get(`retos/${slug}/mascota/`);
+    setPregunta(data);
+  }
 
   useEffect(() => {
     let activo = true;
@@ -48,7 +56,9 @@ export default function Ayuda({ slug }) {
     setBurla("");
     setRespuesta("");
     setErrorRed("");
-    setRecienAcertado(false);
+    setJugando(false);
+    setGanado(false);
+    setCopiado(false);
   }
 
   function avanzar() {
@@ -64,13 +74,8 @@ export default function Ayuda({ slug }) {
     try {
       const { data } = await cliente.post(`retos/${slug}/mascota/`, { respuesta });
       if (data.correcto) {
-        setPregunta((actual) => ({
-          ...actual,
-          pista_desbloqueada: true,
-          pista: data.pista,
-        }));
         setRespuesta("");
-        setRecienAcertado(true);
+        await cargar();
       } else {
         setBurla("Jajaja, no. Inténtelo otra vez.");
       }
@@ -81,19 +86,51 @@ export default function Ayuda({ slug }) {
     }
   }
 
+  async function onCompletar(payload) {
+    try {
+      const { data } = await cliente.post(`retos/${slug}/ayuda/`, payload);
+      setPregunta((actual) => ({
+        ...actual,
+        completa: true,
+        pasos: data.pasos,
+        comando: data.comando,
+      }));
+      setJugando(false);
+      setGanado(true);
+      return { ok: true };
+    } catch (fallo) {
+      return { ok: false, mensaje: fallo.response?.data?.mensaje };
+    }
+  }
+
+  async function copiar() {
+    if (!pregunta?.comando) return;
+    try {
+      await navigator.clipboard.writeText(pregunta.comando);
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 1500);
+    } catch (fallo) {
+      setCopiado(false);
+    }
+  }
+
   if (!pregunta?.disponible) {
     return null;
   }
 
+  const resolved = Boolean(ganado || pregunta.completa);
+
   let frase;
-  if (recienAcertado) {
-    frase = "Tome, vea la pista.";
-  } else if (paso === 0) {
+  if (paso === 0) {
     frase = "¿Qué necesita?";
   } else if (paso === 1) {
     frase = "¡Qué quiere!";
   } else if (paso === 2) {
     frase = "No sea cansón.";
+  } else if (resolved) {
+    frase = "Tome, vea la pista.";
+  } else if (pregunta.pista_desbloqueada) {
+    frase = "Bien. Ahora gánese el comando.";
   } else {
     frase = "Listo, pero respóndame esto:";
   }
@@ -111,7 +148,7 @@ export default function Ayuda({ slug }) {
           onClick={() => setAbierto(false)}
         >
           <div
-            className="panel relative w-full max-w-3xl overflow-hidden"
+            className="panel relative max-h-[92vh] w-full max-w-3xl overflow-y-auto"
             onClick={(evento) => evento.stopPropagation()}
           >
             <button
@@ -123,12 +160,12 @@ export default function Ayuda({ slug }) {
               ✕
             </button>
 
-            <div className="grid sm:grid-cols-[280px_1fr]">
-              <div className="flex items-center justify-center bg-[#f4ecdc] p-5">
+            <div className="grid sm:grid-cols-[260px_1fr]">
+              <div className="flex items-center justify-center bg-[#f4ecdc] p-4">
                 <img
                   src="/ayuda2.png"
                   alt="Ayuda"
-                  className="max-h-[380px] w-auto object-contain drop-shadow-md"
+                  className="max-h-[340px] w-auto object-contain drop-shadow-md"
                 />
               </div>
 
@@ -142,19 +179,64 @@ export default function Ayuda({ slug }) {
 
                 <Burbuja>{frase}</Burbuja>
 
-                {recienAcertado ? (
-                  <div className="rounded-xl border border-acento/40 bg-acento/10 p-3">
-                    <p className="text-xs font-semibold text-acento-suave">Pista</p>
-                    <p className="mt-1 text-sm text-tinta">{pregunta.pista}</p>
-                  </div>
-                ) : paso < 3 ? (
+                {paso < 3 ? (
                   <div className="mt-auto">
                     <button type="button" className="boton-primario w-full" onClick={avanzar}>
                       {textoBoton}
                     </button>
                   </div>
+                ) : resolved ? (
+                  <div className="space-y-3">
+                    {pregunta.pasos ? (
+                      <div className="rounded-xl border border-borde bg-panel-2 p-3">
+                        <p className="text-xs font-semibold text-acento-suave">Pasos</p>
+                        <p className="mt-1 whitespace-pre-line text-sm text-tinta">
+                          {pregunta.pasos}
+                        </p>
+                      </div>
+                    ) : null}
+                    {pregunta.comando ? (
+                      <div className="rounded-xl border border-acento/40 bg-acento/10 p-3">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-semibold text-acento-suave">Comando</p>
+                          <button
+                            type="button"
+                            onClick={copiar}
+                            className="rounded-md border border-borde px-2 py-1 text-xs text-tinta transition hover:border-acento"
+                          >
+                            {copiado ? "Copiado" : "Copiar"}
+                          </button>
+                        </div>
+                        <pre className="mt-2 whitespace-pre-wrap break-all font-mono text-xs text-tinta">
+                          {pregunta.comando}
+                        </pre>
+                      </div>
+                    ) : null}
+                  </div>
+                ) : pregunta.pista_desbloqueada ? (
+                  <div className="space-y-3">
+                    <div className="rounded-xl border border-acento/40 bg-acento/10 p-3">
+                      <p className="text-xs font-semibold text-acento-suave">Pista</p>
+                      <p className="mt-1 text-sm text-tinta">{pregunta.pista}</p>
+                    </div>
+                    {jugando ? (
+                      <Minijuego
+                        tipo={pregunta.minijuego}
+                        tokens={pregunta.tokens}
+                        onCompletar={onCompletar}
+                      />
+                    ) : (
+                      <button
+                        type="button"
+                        className="boton-primario w-full"
+                        onClick={() => setJugando(true)}
+                      >
+                        Gánese el comando
+                      </button>
+                    )}
+                  </div>
                 ) : (
-                  <>
+                  <div className="space-y-3">
                     <Burbuja>{pregunta.texto}</Burbuja>
                     {burla ? <Burbuja>{burla}</Burbuja> : null}
                     <form className="flex flex-col gap-2" onSubmit={responder}>
@@ -169,7 +251,7 @@ export default function Ayuda({ slug }) {
                       </button>
                     </form>
                     {errorRed ? <p className="text-sm text-peligro">{errorRed}</p> : null}
-                  </>
+                  </div>
                 )}
               </div>
             </div>

@@ -6,6 +6,8 @@ from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
+import random
+
 from . import cube_engine
 from . import flags as utilidades_flag
 from .models import (
@@ -202,6 +204,10 @@ def _pregunta_de_reto(reto):
     )
 
 
+def _normalizar_espacios(valor: str) -> str:
+    return " ".join((valor or "").split())
+
+
 class VistaMascotaReto(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -210,18 +216,31 @@ class VistaMascotaReto(APIView):
         pregunta = _pregunta_de_reto(reto)
         if not pregunta:
             return Response({"disponible": False})
-        desbloqueada = PistaDesbloqueada.objects.filter(
+
+        registro = PistaDesbloqueada.objects.filter(
             usuario=request.user, pista=pregunta.pista
-        ).exists()
-        return Response(
-            {
-                "disponible": True,
-                "texto": pregunta.texto,
-                "tema": pregunta.tema,
-                "pista_desbloqueada": desbloqueada,
-                "pista": pregunta.pista.texto if desbloqueada else None,
-            }
-        )
+        ).first()
+        desbloqueada = registro is not None
+
+        datos = {
+            "disponible": True,
+            "texto": pregunta.texto,
+            "tema": pregunta.tema,
+            "pista_desbloqueada": desbloqueada,
+            "pista": pregunta.pista.texto if desbloqueada else None,
+            "minijuego": pregunta.pista.minijuego,
+            "completa": bool(registro and registro.completa),
+        }
+
+        if desbloqueada and registro.completa:
+            datos["pasos"] = pregunta.pista.pasos
+            datos["comando"] = pregunta.pista.comando
+        elif desbloqueada and pregunta.pista.minijuego == "ordenar" and pregunta.pista.comando:
+            tokens = pregunta.pista.comando.split()
+            random.shuffle(tokens)
+            datos["tokens"] = tokens
+
+        return Response(datos)
 
     def post(self, request, slug):
         reto = get_object_or_404(Reto, slug=slug, activo=True)
@@ -241,11 +260,59 @@ class VistaMascotaReto(APIView):
                     "correcto": True,
                     "mensaje": "¡Correcto! Aquí tienes una pista.",
                     "pista": pregunta.pista.texto,
+                    "minijuego": pregunta.pista.minijuego,
                 }
             )
 
         return Response(
             {"correcto": False, "mensaje": "No es correcto. Inténtalo de nuevo."}
+        )
+
+
+class VistaAyudaReto(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, slug):
+        reto = get_object_or_404(Reto, slug=slug, activo=True)
+        pregunta = _pregunta_de_reto(reto)
+        if not pregunta:
+            return Response({"disponible": False}, status=status.HTTP_404_NOT_FOUND)
+
+        registro = PistaDesbloqueada.objects.filter(
+            usuario=request.user, pista=pregunta.pista
+        ).first()
+        if registro is None:
+            return Response(
+                {"correcto": False, "mensaje": "Primero responda la pregunta."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if pregunta.pista.minijuego == "ordenar":
+            orden = _normalizar_espacios(request.data.get("orden", ""))
+            esperado = _normalizar_espacios(pregunta.pista.comando)
+            if not esperado or orden != esperado:
+                return Response(
+                    {
+                        "correcto": False,
+                        "mensaje": "Casi... revise el orden e inténtelo otra vez.",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        else:
+            if not request.data.get("completado"):
+                return Response(
+                    {"correcto": False, "mensaje": "Complete el minijuego primero."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        registro.completa = True
+        registro.save(update_fields=["completa"])
+        return Response(
+            {
+                "correcto": True,
+                "pasos": pregunta.pista.pasos,
+                "comando": pregunta.pista.comando,
+            }
         )
 
 

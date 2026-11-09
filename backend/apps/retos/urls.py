@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .views import (
+    VistaAyudaReto,
     VistaClasificacion,
     VistaDetalleReto,
     VistaEnvioFlag,
@@ -18,6 +19,7 @@ urlpatterns = [
     path("retos/<slug:slug>/", VistaDetalleReto.as_view(), name="detalle_reto"),
     path("retos/<slug:slug>/enviar/", VistaEnvioFlag.as_view(), name="enviar_flag"),
     path("retos/<slug:slug>/mascota/", VistaMascotaReto.as_view(), name="mascota_reto"),
+    path("retos/<slug:slug>/ayuda/", VistaAyudaReto.as_view(), name="ayuda_reto"),
     path("cubo/", VistaEstadoCubo.as_view(), name="estado_cubo"),
     path("clasificacion/", VistaClasificacion.as_view(), name="clasificacion"),
 ]

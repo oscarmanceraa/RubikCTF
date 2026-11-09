@@ -15,6 +15,13 @@ class Dificultad(models.TextChoices):
     EXPERTO = "experto", "Experto"
 
 
+class Minijuego(models.TextChoices):
+    ORDENAR = "ordenar", "Ordenar el comando"
+    PACIENCIA = "paciencia", "Paciencia del payaso"
+    SIMON = "simon", "Simon del cubo"
+    PPT = "ppt", "Piedra papel tijera"
+
+
 class Categoria(models.Model):
     """Categoria del CTF, asociada a un color del cubo."""
 
@@ -211,6 +218,11 @@ class Pista(models.Model):
 
     reto = models.ForeignKey(Reto, on_delete=models.CASCADE, related_name="pistas")
     texto = models.TextField("texto")
+    pasos = models.TextField("pasos", blank=True)
+    comando = models.TextField("comando exacto", blank=True)
+    minijuego = models.CharField(
+        "minijuego", max_length=20, choices=Minijuego.choices, default=Minijuego.ORDENAR
+    )
     coste = models.PositiveIntegerField("coste en puntos", default=0)
     orden = models.PositiveSmallIntegerField("orden", default=0)
     activa = models.BooleanField("activa", default=True)
@@ -254,6 +266,7 @@ class PistaDesbloqueada(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="pistas_desbloqueadas"
     )
     pista = models.ForeignKey(Pista, on_delete=models.CASCADE, related_name="desbloqueadas_por")
+    completa = models.BooleanField("completa", default=False)
     desbloqueada_en = models.DateTimeField("desbloqueada", auto_now_add=True)
 
     class Meta:
