@@ -21,6 +21,7 @@ FLAG = os.environ.get("RETO_FLAG", "RUBIK{stored_xss_101}")
 COMENTARIOS = {}
 CANDADO = threading.Lock()
 USUARIOS_VISTOS = set()
+EVENTO_COMENTARIO = threading.Event()
 
 PLANTILLA = """
 <!doctype html>
@@ -144,6 +145,7 @@ def comentario():
         lista = COMENTARIOS.setdefault(nombre, [])
         lista.append({"autor": autor, "texto": texto})
         del lista[:-50]
+    EVENTO_COMENTARIO.set()
     return redirect("/")
 
 
@@ -158,8 +160,10 @@ def bucle_bot() -> None:
                     args=["--no-sandbox", "--disable-dev-shm-usage"]
                 )
                 while True:
+                    EVENTO_COMENTARIO.wait(timeout=60)
+                    EVENTO_COMENTARIO.clear()
                     with CANDADO:
-                        usuarios = list(USUARIOS_VISTOS) or ["anonimo"]
+                        usuarios = [u for u, lista in COMENTARIOS.items() if lista]
                     for nombre in usuarios:
                         try:
                             contexto = navegador.new_context()
@@ -188,7 +192,8 @@ def bucle_bot() -> None:
                             contexto.close()
                         except Exception:
                             pass
-                    time.sleep(10)
+                        time.sleep(2)
+                    time.sleep(3)
         except Exception:
             time.sleep(10)
 
