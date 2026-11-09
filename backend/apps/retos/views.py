@@ -32,16 +32,28 @@ Usuario = get_user_model()
 
 
 def retos_anotados(usuario):
-    """Queryset de retos activos con el campo ``resuelto`` para el usuario."""
+    """Queryset de retos activos con el campo ``resuelto`` para el usuario.
+
+    El reto final (``es_final``) queda oculto hasta que el usuario resuelve
+    todos los retos no finales.
+    """
     consulta = (
         Reto.objects.filter(activo=True)
         .select_related("categoria")
         .prefetch_related("movimientos_reto__movimiento")
     )
     if usuario and usuario.is_authenticated:
+        total_previos = Reto.objects.filter(activo=True, es_final=False).count()
+        resueltos_previos = RetoResuelto.objects.filter(
+            usuario=usuario, reto__activo=True, reto__es_final=False
+        ).count()
+        final_desbloqueado = total_previos > 0 and resueltos_previos >= total_previos
+        if not final_desbloqueado:
+            consulta = consulta.filter(es_final=False)
         resueltos = RetoResuelto.objects.filter(usuario=usuario, reto=OuterRef("pk"))
         consulta = consulta.annotate(resuelto=Exists(resueltos))
     else:
+        consulta = consulta.filter(es_final=False)
         consulta = consulta.annotate(resuelto=Value(False, output_field=BooleanField()))
     return consulta
 

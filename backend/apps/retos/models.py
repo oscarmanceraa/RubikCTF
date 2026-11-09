@@ -79,6 +79,7 @@ class Reto(models.Model):
     hash_flag = models.CharField("hash de flag", max_length=64, blank=True)
 
     activo = models.BooleanField("activo", default=True)
+    es_final = models.BooleanField("reto final", default=False)
     creado_en = models.DateTimeField("creado", auto_now_add=True)
     actualizado_en = models.DateTimeField("actualizado", auto_now=True)
 

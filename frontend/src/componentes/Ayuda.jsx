@@ -267,15 +267,9 @@ export default function Ayuda({ slug }) {
           type="button"
           onClick={abrir}
           aria-label="Abrir ayuda"
-          className="relative h-16 w-16 overflow-hidden rounded-full shadow-[0_10px_30px_rgba(124,92,255,.35)] ring-2 ring-acento/40 transition hover:scale-105"
+          className="relative grid h-14 w-14 place-items-center rounded-full bg-acento text-2xl font-bold text-white shadow-[0_10px_30px_rgba(124,92,255,.45)] transition hover:scale-105"
         >
-          <span className="mascota-flotar block h-full w-full">
-            <img
-              src="/ayuda.png"
-              alt="Ayuda"
-              className="h-full w-full scale-125 object-cover object-[50%_40%]"
-            />
-          </span>
+          ?
         </button>
       </div>
     </>

@@ -35,6 +35,7 @@ class SerializadorRetoLista(serializers.ModelSerializer):
             "etiqueta_dificultad",
             "puntos",
             "resuelto",
+            "es_final",
             "movimientos",
         )
 
