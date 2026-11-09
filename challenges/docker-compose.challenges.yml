@@ -125,6 +125,41 @@ services:
     mem_limit: 128m
     cpus: 0.25
 
+  final-entry:
+    build:
+      context: ./final-boreal/entry
+    container_name: reto-final-entry
+    ports:
+      - "2222:22"
+      - "8088:80"
+    networks:
+      boreal_int:
+        ipv4_address: 10.10.10.10
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 256m
+    cpus: 0.5
+
+  final-internal:
+    build:
+      context: ./final-boreal/internal
+    container_name: reto-final-internal
+    networks:
+      boreal_int:
+        ipv4_address: 10.10.10.20
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 256m
+    cpus: 0.5
+
 networks:
   retos:
     driver: bridge
+  boreal_int:
+    driver: bridge
+    internal: true
+    ipam:
+      config:
+        - subnet: 10.10.10.0/24

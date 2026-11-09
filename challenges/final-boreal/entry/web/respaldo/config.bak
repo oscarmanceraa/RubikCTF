@@ -1,0 +1,14 @@
+# AuroraVault - copia de seguridad de configuracion
+# (este archivo NO deberia estar accesible desde el portal)
+
+DB_HOST=boreal-internal
+DB_NAME=aurora
+DB_USER=aurora
+DB_PASS=Aur0ra-DB-2024
+
+# Cuenta de mantenimiento del portal
+MANT_USER=mantenimiento
+MANT_PASS=Mant3n1m13nto!2024
+
+# Servidor interno de respaldos: 10.10.10.20 (solo desde la red interna)
+# Usuario interno: mantenimiento / B0r34l-Int3rno-2024

@@ -44,23 +44,33 @@ export default function Panel() {
   const retosJefe = retos.filter((reto) => !reto.es_final);
   const totalJefe = retosJefe.length;
   const resueltosJefe = retosJefe.filter((reto) => reto.resuelto).length;
-  const vida = totalJefe ? Math.round(100 * (1 - resueltosJefe / totalJefe)) : 100;
+  const finalReto = retos.find((reto) => reto.es_final);
+  const finalResuelto = Boolean(finalReto && finalReto.resuelto);
+  const debilitado = totalJefe > 0 && resueltosJefe >= totalJefe && !finalResuelto;
+  const derrotado = finalResuelto;
+  const vida =
+    derrotado || debilitado
+      ? 0
+      : totalJefe
+        ? Math.round(100 * (1 - resueltosJefe / totalJefe))
+        : 100;
   const porcentajeJefe = totalJefe ? resueltosJefe / totalJefe : 0;
-  const derrotado = totalJefe > 0 && resueltosJefe >= totalJefe;
 
   const FASES = {
     1: { img: "/jefe-fase1.png", nombre: "El payaso · al límite" },
     2: { img: "/jefe-fase2.png", nombre: "El payaso · tocado" },
     3: { img: "/jefe-fase3.png", nombre: "El payaso · enfadado" },
     4: { img: "/jefe-fase4.png", nombre: "El payaso · forma tocha" },
-    muerte: { img: "/jefe-muerte.png", nombre: "Derrotado" },
   };
   let fase = 4;
-  if (derrotado) fase = "muerte";
-  else if (porcentajeJefe >= 0.75) fase = 1;
+  if (porcentajeJefe >= 0.75) fase = 1;
   else if (porcentajeJefe >= 0.5) fase = 2;
   else if (porcentajeJefe >= 0.25) fase = 3;
-  const faseActual = FASES[fase];
+  const faseActual = derrotado
+    ? { img: "/jefe-muerte.png", nombre: "Derrotado" }
+    : debilitado
+      ? { img: "/jefe-fase1.png", nombre: "El payaso · debilitado" }
+      : FASES[fase];
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-10">
@@ -106,11 +116,17 @@ export default function Panel() {
 
               <p className="mt-4 text-sm text-apagado">
                 {derrotado
-                  ? "¡Jefe derrotado! El reto final se ha desbloqueado."
-                  : `Cada reto resuelto le quita vida al payaso. Llevas ${resueltosJefe} de ${totalJefe}.`}
+                  ? "¡Jefe derrotado! Has completado RUBIK CTF."
+                  : debilitado
+                    ? "Jefe debilitado. ¡Reto final desbloqueado!"
+                    : `Cada reto resuelto le quita vida al payaso. Llevas ${resueltosJefe} de ${totalJefe}.`}
               </p>
 
               {derrotado ? (
+                <div className="mt-3 rounded-xl border border-acento/40 bg-acento/10 p-3 text-sm text-tinta">
+                  CTF completado. Eres el Rubik Master definitivo.
+                </div>
+              ) : debilitado ? (
                 <div className="mt-3 rounded-xl border border-peligro/40 bg-peligro/10 p-3 text-sm text-tinta">
                   Reto final desbloqueado. Búscalo en{" "}
                   <Link to="/retos" className="text-acento-suave hover:underline">

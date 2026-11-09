@@ -25,6 +25,7 @@ from apps.retos.models import (
 
 BASE_RETOS = os.environ.get("HOST_RETOS", "http://192.168.56.77").rstrip("/")
 HOST = BASE_RETOS.replace("http://", "").replace("https://", "")
+RETOS_FINALES = {"incidente-boreal"}
 
 CATEGORIAS = [
     ("Web", "web", "#2ecc71", 1),
@@ -152,6 +153,20 @@ RETOS = [
         "respuesta correcta NO contiene 'incorrectas') y recupera el codigo "
         "de auditoria del panel.",
         f"{BASE_RETOS}:8009",
+    ),
+    (
+        "Operacion Boreal",
+        "incidente-boreal",
+        "redes",
+        "experto",
+        1000,
+        "RUBIK{incidente_boreal_final}",
+        ["R"],
+        "Reto final: cadena de ataque completa sobre AuroraVault. Empieza "
+        f"escaneando {HOST} (SSH en 2222, web en 8088). Recupera "
+        "/root/INCIDENTE_BOREAL/flag.txt en la maquina interna. Necesitaras "
+        "pivote SSH y escalada de privilegios.",
+        f"{BASE_RETOS}:8088",
     ),
 ]
 
@@ -295,6 +310,7 @@ class Command(BaseCommand):
                     "dificultad": dificultad,
                     "puntos": puntos,
                     "activo": True,
+                    "es_final": slug in RETOS_FINALES,
                 },
             )
             if creado:
