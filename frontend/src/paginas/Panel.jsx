@@ -49,17 +49,17 @@ export default function Panel() {
   const derrotado = totalJefe > 0 && resueltosJefe >= totalJefe;
 
   const FASES = {
-    1: { img: "/jefe-fase1.png", nombre: "Fase 1 · El payaso gruñón" },
-    2: { img: "/jefe-fase2.png", nombre: "Fase 2 · Se está calentando" },
-    3: { img: "/jefe-fase3.png", nombre: "Fase 3 · Modo bestia" },
-    4: { img: "/jefe-fase4.png", nombre: "Fase 4 · Forma final" },
+    1: { img: "/jefe-fase1.png", nombre: "El payaso · al límite" },
+    2: { img: "/jefe-fase2.png", nombre: "El payaso · tocado" },
+    3: { img: "/jefe-fase3.png", nombre: "El payaso · enfadado" },
+    4: { img: "/jefe-fase4.png", nombre: "El payaso · forma tocha" },
     muerte: { img: "/jefe-muerte.png", nombre: "Derrotado" },
   };
-  let fase = 1;
+  let fase = 4;
   if (derrotado) fase = "muerte";
-  else if (porcentajeJefe >= 0.75) fase = 4;
-  else if (porcentajeJefe >= 0.5) fase = 3;
-  else if (porcentajeJefe >= 0.3) fase = 2;
+  else if (porcentajeJefe >= 0.75) fase = 1;
+  else if (porcentajeJefe >= 0.5) fase = 2;
+  else if (porcentajeJefe >= 0.25) fase = 3;
   const faseActual = FASES[fase];
 
   return (
