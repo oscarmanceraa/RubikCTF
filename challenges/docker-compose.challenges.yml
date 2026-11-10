@@ -133,6 +133,7 @@ services:
       - "2222:22"
       - "8088:80"
     networks:
+      boreal_pub:
       boreal_int:
         ipv4_address: 10.10.10.10
     restart: unless-stopped
@@ -156,6 +157,8 @@ services:
 
 networks:
   retos:
+    driver: bridge
+  boreal_pub:
     driver: bridge
   boreal_int:
     driver: bridge
